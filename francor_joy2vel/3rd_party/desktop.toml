@@ -1,0 +1,320 @@
+[config]
+name = "desktop"
+default_preset = "desktop"
+
+
+[actions.feedback_left_medium]
+type = "feedback"
+side = "left"
+amplitude = "400"
+
+[actions.feedback_left_strong]
+type = "feedback"
+side = "left"
+amplitude = "600"
+
+[actions.feedback_right_low]
+type = "feedback"
+side = "right"
+amplitude = "200"
+
+[actions.feedback_right_medium]
+type = "feedback"
+side = "right"
+amplitude = "400"
+
+[actions.left_click]
+type = "mouse_button"
+state = "press"
+button = "left"
+
+[actions.left_click_release]
+type = "mouse_button"
+state = "release"
+button = "left"
+
+[actions.middle_click]
+type = "mouse_button"
+state = "press"
+button = "middle"
+
+[actions.middle_click_release]
+type = "mouse_button"
+state = "release"
+button = "middle"
+
+[actions.right_click]
+type = "mouse_button"
+state = "press"
+button = "right"
+
+[actions.right_click_release]
+type = "mouse_button"
+state = "release"
+button = "right"
+
+[actions.mouse_forward]
+type = "mouse_button"
+state = "press"
+button = "forward"
+
+[actions.mouse_forward_release]
+type = "mouse_button"
+state = "release"
+button = "forward"
+
+[actions.mouse_back]
+type = "mouse_button"
+state = "press"
+button = "back"
+
+[actions.mouse_back_release]
+type = "mouse_button"
+state = "release"
+button = "back"
+
+[actions.scroll_up]
+type = "mouse_axis"
+axis = "wheel_v"
+value = "1"
+
+[actions.scroll_down]
+type = "mouse_axis"
+axis = "wheel_v"
+value = "-1"
+
+[actions.press_left_shift]
+type = "keyboard_key"
+state = "press"
+key = "leftshift"
+
+[actions.release_left_shift]
+type = "keyboard_key"
+state = "release"
+key = "leftshift"
+
+[actions.press_up]
+type = "keyboard_key"
+state = "press"
+key = "up"
+
+[actions.release_up]
+type = "keyboard_key"
+state = "release"
+key = "up"
+
+[actions.press_down]
+type = "keyboard_key"
+state = "press"
+key = "down"
+
+[actions.release_down]
+type = "keyboard_key"
+state = "release"
+key = "down"
+
+[actions.press_left]
+type = "keyboard_key"
+state = "press"
+key = "left"
+
+[actions.release_left]
+type = "keyboard_key"
+state = "release"
+key = "left"
+
+[actions.press_right]
+type = "keyboard_key"
+state = "press"
+key = "right"
+
+[actions.release_right]
+type = "keyboard_key"
+state = "release"
+key = "right"
+
+[actions.press_page_up]
+type = "keyboard_key"
+state = "press"
+key = "pageup"
+
+[actions.release_page_up]
+type = "keyboard_key"
+state = "release"
+key = "pageup"
+
+[actions.press_page_down]
+type = "keyboard_key"
+state = "press"
+key = "pagedown"
+
+[actions.release_page_down]
+type = "keyboard_key"
+state = "release"
+key = "pagedown"
+
+[actions.press_space]
+type = "keyboard_key"
+state = "press"
+key = "space"
+
+[actions.release_space]
+type = "keyboard_key"
+state = "release"
+key = "space"
+
+[actions.press_enter]
+type = "keyboard_key"
+state = "press"
+key = "enter"
+
+[actions.release_enter]
+type = "keyboard_key"
+state = "release"
+key = "enter"
+
+[actions.press_tab]
+type = "keyboard_key"
+state = "press"
+key = "tab"
+
+[actions.release_tab]
+type = "keyboard_key"
+state = "release"
+key = "tab"
+
+[actions.press_esc]
+type = "keyboard_key"
+state = "press"
+key = "esc"
+
+[actions.release_esc]
+type = "keyboard_key"
+state = "release"
+key = "esc"
+
+[actions.press_left_control]
+type = "keyboard_key"
+state = "press"
+key = "leftctrl"
+
+[actions.release_left_control]
+type = "keyboard_key"
+state = "release"
+key = "leftctrl"
+
+[actions.press_left_alt]
+type = "keyboard_key"
+state = "press"
+key = "leftalt"
+
+[actions.release_left_alt]
+type = "keyboard_key"
+state = "release"
+key = "leftalt"
+
+
+[modes.left_trackpad]
+type = "circle"
+clockwise = [ "scroll_down", "feedback_left_strong" ]
+counter_clockwise = [ "scroll_up", "feedback_left_strong" ]
+press = "middle_click"
+release = "middle_click_release"
+
+[modes.right_trackpad]
+type = "mouse"
+tap = "left_click"
+tap_release = "left_click_release"
+press = "press_left_shift"
+release = "release_left_shift"
+feedback = "feedback_right_low"
+
+[modes.joystick]
+type = "four_buttons"
+fan = "135"
+up = [ "press_up", "feedback_left_medium" ]
+up_release = [ "release_up", "feedback_left_medium" ]
+down = [ "press_down", "feedback_left_medium" ]
+down_release = [ "release_down", "feedback_left_medium" ]
+left = [ "press_left", "feedback_left_medium" ]
+left_release = [ "release_left", "feedback_left_medium" ]
+right = [ "press_right", "feedback_left_medium" ]
+right_release = [ "release_right", "feedback_left_medium" ]
+
+[modes.left_trigger]
+type = "simple"
+press = [ "right_click", "feedback_left_medium" ]
+release = [ "right_click_release", "feedback_left_medium" ]
+
+[modes.right_trigger]
+type = "simple"
+press = [ "left_click", "feedback_right_medium" ]
+release = [ "left_click_release", "feedback_right_medium" ]
+
+[modes.button_a]
+type = "simple"
+press = "press_enter"
+release = "release_enter"
+
+[modes.button_b]
+type = "simple"
+press = "press_space"
+release = "release_space"
+
+[modes.button_x]
+type = "simple"
+press = "press_page_up"
+release = "release_page_up"
+
+[modes.button_y]
+type = "simple"
+press = "press_page_down"
+release = "release_page_down"
+
+[modes.select]
+type = "simple"
+press = "press_tab"
+release = "release_tab"
+
+[modes.start]
+type = "simple"
+press = "press_esc"
+release = "release_esc"
+
+[modes.left_gripper]
+type = "simple"
+press = "mouse_back"
+release = "mouse_back_release"
+
+[modes.right_gripper]
+type = "simple"
+press = "mouse_forward"
+release = "mouse_forward_release"
+
+[modes.left_shoulder]
+type = "simple"
+press = "press_left_control"
+release = "release_left_control"
+
+[modes.right_shoulder]
+type = "simple"
+press = "press_left_alt"
+release = "release_left_alt"
+
+
+[presets.desktop]
+left_trackpad = "left_trackpad"
+right_trackpad = "right_trackpad"
+left_trigger = "left_trigger"
+right_trigger = "right_trigger"
+joystick = "joystick"
+button_a = "button_a"
+button_b = "button_b"
+button_x = "button_x"
+button_y = "button_y"
+select = "select"
+start = "start"
+left_gripper = "left_gripper"
+right_gripper = "right_gripper"
+left_shoulder = "left_shoulder"
+right_shoulder = "right_shoulder"

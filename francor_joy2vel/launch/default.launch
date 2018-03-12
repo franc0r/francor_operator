@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- joy node -->
+  <node name="joy_node" pkg="joy" type="joy_node" output="screen">
+  </node>
+  <!-- joy2vel node -->
+  <node name="francor_joy2vel_node" pkg="francor_joy2vel" type="francor_joy2vel_node" output="screen">
+    <param name="joy_maprate"      type="string" value="sc"   />
+    <param name="rate"             type="double" value="50.0"   />
+    <param name="max_lin_vel"      type="double" value="1.0 "   />
+    <param name="max_ang_vel"      type="double" value="1.0 "   />
+  </node>
+
+  <!-- <node name="start_scd_sh" pkg="francor_joy2vel" type="start_scd.sh" output="screen"/> -->
+
+</launch>

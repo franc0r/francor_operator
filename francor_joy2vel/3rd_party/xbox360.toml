@@ -1,0 +1,280 @@
+[config]
+name = "xbox360"
+default_preset = "xbox360"
+
+
+[actions.feedback_left_strong]
+type = "feedback"
+side = "left"
+amplitude = "800"
+period = "800"
+
+[actions.feedback_right_low]
+type = "feedback"
+side = "right"
+amplitude = "200"
+
+[actions.press_a]
+type = "xbox360_button"
+state = "press"
+button = "a"
+
+[actions.release_a]
+type = "xbox360_button"
+state = "release"
+button = "a"
+
+[actions.press_b]
+type = "xbox360_button"
+state = "press"
+button = "b"
+
+[actions.release_b]
+type = "xbox360_button"
+state = "release"
+button = "b"
+
+[actions.press_x]
+type = "xbox360_button"
+state = "press"
+button = "x"
+
+[actions.release_x]
+type = "xbox360_button"
+state = "release"
+button = "x"
+
+[actions.press_y]
+type = "xbox360_button"
+state = "press"
+button = "y"
+
+[actions.release_y]
+type = "xbox360_button"
+state = "release"
+button = "y"
+
+[actions.press_start]
+type = "xbox360_button"
+state = "press"
+button = "start"
+
+[actions.release_start]
+type = "xbox360_button"
+state = "release"
+button = "start"
+
+[actions.press_select]
+type = "xbox360_button"
+state = "press"
+button = "select"
+
+[actions.release_select]
+type = "xbox360_button"
+state = "release"
+button = "select"
+
+[actions.press_mode]
+type = "xbox360_button"
+state = "press"
+button = "mode"
+
+[actions.release_mode]
+type = "xbox360_button"
+state = "release"
+button = "mode"
+
+[actions.press_left_thumb]
+type = "xbox360_button"
+state = "press"
+button = "left_thumb"
+
+[actions.release_left_thumb]
+type = "xbox360_button"
+state = "release"
+button = "left_thumb"
+
+[actions.press_right_thumb]
+type = "xbox360_button"
+state = "press"
+button = "right_thumb"
+
+[actions.release_right_thumb]
+type = "xbox360_button"
+state = "release"
+button = "right_thumb"
+
+[actions.press_left_shoulder]
+type = "xbox360_button"
+state = "press"
+button = "left_shoulder"
+
+[actions.release_left_shoulder]
+type = "xbox360_button"
+state = "release"
+button = "left_shoulder"
+
+[actions.press_right_shoulder]
+type = "xbox360_button"
+state = "press"
+button = "right_shoulder"
+
+[actions.release_right_shoulder]
+type = "xbox360_button"
+state = "release"
+button = "right_shoulder"
+
+[actions.left_thumb_x]
+type = "xbox360_axis"
+axis = "left_thumb_x"
+
+[actions.left_thumb_y]
+type = "xbox360_axis"
+axis = "left_thumb_y"
+invert = "true"
+
+[actions.right_thumb_x]
+type = "xbox360_axis"
+axis = "right_thumb_x"
+
+[actions.right_thumb_y]
+type = "xbox360_axis"
+axis = "right_thumb_y"
+invert = "true"
+
+[actions.left_trigger]
+type = "xbox360_axis"
+axis = "left_trigger"
+
+[actions.right_trigger]
+type = "xbox360_axis"
+axis = "right_trigger"
+
+[actions.press_dpad_up]
+type = "xbox360_axis"
+axis = "dpad_y"
+value = "-1"
+
+[actions.press_dpad_down]
+type = "xbox360_axis"
+axis = "dpad_y"
+value = "1"
+
+[actions.release_dpad_y]
+type = "xbox360_axis"
+axis = "dpad_y"
+value = "0"
+
+[actions.press_dpad_left]
+type = "xbox360_axis"
+axis = "dpad_x"
+value = "-1"
+
+[actions.press_dpad_right]
+type = "xbox360_axis"
+axis = "dpad_x"
+value = "1"
+
+[actions.release_dpad_x]
+type = "xbox360_axis"
+axis = "dpad_x"
+value = "0"
+
+
+[modes.button_a]
+type = "simple"
+press = "press_a"
+release = "release_a"
+
+[modes.button_b]
+type = "simple"
+press = "press_b"
+release = "release_b"
+
+[modes.button_x]
+type = "simple"
+press = "press_x"
+release = "release_x"
+
+[modes.button_y]
+type = "simple"
+press = "press_y"
+release = "release_y"
+
+[modes.start]
+type = "simple"
+press = "press_start"
+release = "release_start"
+
+[modes.select]
+type = "simple"
+press = "press_select"
+release = "release_select"
+
+[modes.steam]
+type = "simple"
+press = "press_mode"
+release = "release_mode"
+
+[modes.left_shoulder]
+type = "simple"
+press = "press_left_shoulder"
+release = "release_left_shoulder"
+
+[modes.right_shoulder]
+type = "simple"
+press = "press_right_shoulder"
+release = "release_right_shoulder"
+
+[modes.joystick]
+type = "simple"
+x = "left_thumb_x"
+y = "left_thumb_y"
+press = "press_left_thumb"
+release = "release_left_thumb"
+
+[modes.right_trackpad]
+type = "simple"
+x = "right_thumb_x"
+y = "right_thumb_y"
+press = "press_right_thumb"
+release = "release_right_thumb"
+feedback = "feedback_right_low"
+
+[modes.left_trigger]
+type = "simple"
+axis = "left_trigger"
+
+[modes.right_trigger]
+type = "simple"
+axis = "right_trigger"
+
+[modes.left_trackpad]
+type = "four_buttons"
+press = "true"
+fan = "135"
+up = [ "press_dpad_up", "feedback_left_strong" ]
+up_release = [ "release_dpad_y", "feedback_left_strong" ]
+down = [ "press_dpad_down", "feedback_left_strong" ]
+down_release = [ "release_dpad_y", "feedback_left_strong" ]
+left = [ "press_dpad_left", "feedback_left_strong" ]
+left_release = [ "release_dpad_x", "feedback_left_strong" ]
+right = [ "press_dpad_right", "feedback_left_strong" ]
+right_release = [ "release_dpad_x", "feedback_left_strong" ]
+
+
+[presets.xbox360]
+button_a = "button_a"
+button_b = "button_b"
+button_x = "button_x"
+button_y = "button_y"
+start = "start"
+select = "select"
+steam = "steam"
+left_shoulder = "left_shoulder"
+right_shoulder = "right_shoulder"
+joystick = "joystick"
+right_trackpad = "right_trackpad"
+left_trigger = "left_trigger"
+right_trigger = "right_trigger"
+left_trackpad = "left_trackpad"
