@@ -10,12 +10,34 @@
 #ifndef JOYMAP_H_
 #define JOYMAP_H_
 
+#include <functional>
+
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/TwistStamped.h>
 
+#include <francor_msgs/SensorHeadCmd.h>
+
 namespace francor{
+
+namespace btn{
+enum enum_JoyMapBtn{
+  X = 0,
+  Y,
+  A,
+  B,
+  JS_L,
+  JS_R,
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
+  TR_L,
+  TR_R,
+  NUM_BTN
+};
+} //namespace btn
 
 struct JoyInput{
   bool init_ok = false;
@@ -27,30 +49,34 @@ struct JoyInput{
   double vel_lin_y = 0.0;   //for future use ... mecanum..
   double vel_ang = 0.0;
 
+  double vel_sh_pan  = 0.0;
+  double vel_sh_tilt = 0.0;
   //todo vel for sensorhead...
 
-  bool btn_x = false;
-  bool btn_y = false;
-  bool btn_a = false;
-  bool btn_b = false;
-  bool btn_joystick_l = false;
-  bool btn_joystick_r = false;
-  bool btn_up = false;
-  bool btn_down = false;
-  bool btn_left = false;
-  bool btn_right = false;
-  bool btn_trigger_left = false;
-  bool btn_trigger_right = false;
+  std::vector<bool> btns = std::vector<bool>(btn::NUM_BTN, false);
+};
+
+
+
+
+struct JoyMapButton_callbacks{
+  
 };
 
 class JoyMap{
 public:
-  JoyMap()
-  { }
+  JoyMap(const double dead_zone_sh)
+  {
+    if(dead_zone_sh > 1.0)
+    {
+      _dead_zone_sh = 1.0;
+    }
+    _dead_zone_sh = std::abs(dead_zone_sh);
+  }
   virtual ~JoyMap()
   { }
 
-  geometry_msgs::TwistStamped toTwistStamped(const double lin_scale = 1.0, const double ang_scale = 1.0) const
+  inline geometry_msgs::TwistStamped toTwistStamped(const double lin_scale = 1.0, const double ang_scale = 1.0) const
   {
     geometry_msgs::TwistStamped twist;
     twist.header.stamp = ros::Time::now();
@@ -59,13 +85,27 @@ public:
     twist.twist.linear.y  = _input.vel_lin_y * lin_scale;
     return twist;
   }
-  geometry_msgs::Twist toTwist(const double lin_scale = 1.0, const double ang_scale = 1.0) const
+  inline geometry_msgs::Twist toTwist(const double lin_scale = 1.0, const double ang_scale = 1.0) const
   {
     geometry_msgs::Twist twist;
     twist.angular.z = _input.vel_ang * ang_scale;
     twist.linear.x  = _input.vel_lin_x * lin_scale;
     twist.linear.y  = _input.vel_lin_y * lin_scale;
     return twist;
+  }
+
+  inline francor_msgs::SensorHeadCmd toSensorHeadCmd(const double scale = 1.0)
+  {
+    francor_msgs::SensorHeadCmd cmd;
+    
+    // int16_t cmd_pan  = 500 + 1000 + std::round(1000.0 * _input.vel_sh_pan);
+    // int16_t cmd_tilt = 500 + 1000 + std::round(1000.0 * _input.vel_sh_tilt);
+    int16_t cmd_pan  = std::round(scale * _input.vel_sh_pan);
+    int16_t cmd_tilt = std::round(scale * _input.vel_sh_tilt);
+
+    cmd.pan  = cmd_pan;
+    cmd.tilt = cmd_tilt;
+    return cmd;
   }
 
   void map(const sensor_msgs::Joy& joy_msg)
@@ -78,14 +118,50 @@ public:
     return _input;
   }
 
+  static inline double signum(const double x)
+  {
+    return (x > 0) - (x < 0);
+  }
+
+  void attach_callback(const btn::enum_JoyMapBtn btn, const std::function<void(void)>& fcn)
+  {
+    try{
+      _callbacks.at(btn) = fcn;
+    } catch(std::out_of_range& e)
+    {
+      ROS_ERROR_STREAM("Unable to attach callback wront btn -> out of range. what?:"  << e.what());
+      return;
+    }
+  }
+
+  void triggerBtn_callbacks()
+  {
+    for(unsigned int i = 0; i < static_cast<unsigned int>(btn::NUM_BTN); i++)
+    {
+      //prove event
+      if(!_btn_old[i] && _input.btns[i])
+      {
+        //call callback
+        if(_callbacks[i])
+          _callbacks[i]();
+      }
+    }
+    //save old
+    _btn_old = _input.btns;
+  }
+
   //todo fcn to button
   //todo fcn to vel sensorhead..
   virtual void showInitMsg() const = 0;
 protected:
   virtual JoyInput map_input(const sensor_msgs::Joy& joy_msg) = 0;
+  double _dead_zone_sh;
 
 private:
   JoyInput _input;
+
+  std::vector<std::function<void(void)>> _callbacks = std::vector<std::function<void(void)>>(btn::NUM_BTN);
+  std::vector<bool> _btn_old = std::vector<bool>(btn::NUM_BTN, false);
 };
 
 } //namespace francor

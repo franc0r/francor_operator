@@ -22,16 +22,29 @@ FrancorJoy2Vel::FrancorJoy2Vel()
   double rate;
   double max_lin_vel;
   double max_ang_vel;
+  double max_sh_vel;
+  double dead_zone_sh;
+
+  int pan_default;
+  int tilt_default;
 
   privNh.param(         "joy_map" ,        joy_map,   std::string("default"));
   privNh.param<double>( "rate" ,           rate,          50.0);
   privNh.param<double>( "max_lin_vel" ,    max_lin_vel,   1.0);
   privNh.param<double>( "max_ang_vel" ,    max_ang_vel,   1.0);
-  // privNh.param<int>(    "int_val"    ,    int_val   ,   1.0);
+  privNh.param<double>( "max_sh_vel" ,     max_sh_vel,   30.0);
+  privNh.param<double>( "dead_zone_sh" ,   dead_zone_sh,  0.3);
+
+  privNh.param<int>(    "pan_default"    ,    pan_default   ,   0);
+  privNh.param<int>(    "tilt_default"    ,    tilt_default   ,   20);
   // privNh.param<bool>(   "bool_val"   ,    bool_val  ,   true);
 
   _max_lin_vel = max_lin_vel;
   _max_ang_vel = max_ang_vel;
+  _max_sh_vel  = max_sh_vel;
+
+  _sh_default.pan  = pan_default;
+  _sh_default.tilt = tilt_default;
 
   _rate = rate;
   if(rate < 1.0)
@@ -43,23 +56,30 @@ FrancorJoy2Vel::FrancorJoy2Vel()
   if(joy_map == "sc")
   {
     ROS_INFO("Create Steamcontroller mapper");
-    _joy_mapper = std::make_unique<francor::JoyMapSc>();
+    _joy_mapper = std::make_unique<francor::JoyMapSc>(dead_zone_sh);
   }
   else if(joy_map == "todo")
   {
     ROS_INFO("Create TODO mapper");
-    _joy_mapper = std::make_unique<francor::JoyMapSc>();
+    _joy_mapper = std::make_unique<francor::JoyMapSc>(dead_zone_sh);
   }
   else
   {
     ROS_INFO("Create Default mapper (Steamcontroller)");
-    _joy_mapper = std::make_unique<francor::JoyMapSc>();
+    _joy_mapper = std::make_unique<francor::JoyMapSc>(dead_zone_sh);
   }
 
   _joy_mapper->showInitMsg();
 
+  _joy_mapper->attach_callback(francor::btn::TR_L, std::bind(&FrancorJoy2Vel::btn_trigger_left_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::TR_R, std::bind(&FrancorJoy2Vel::btn_trigger_right_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::X, std::bind(&FrancorJoy2Vel::btn_x_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::Y, std::bind(&FrancorJoy2Vel::btn_y_pressed, this));
+
   //init publisher
-  _pubTwist = _nh.advertise<geometry_msgs::TwistStamped>("cmd_vel", 1);
+  _pubTwist           = _nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+  _pubSpeedSensorHead = _nh.advertise<francor_msgs::SensorHeadCmd>("/sensor_head/set_speed", 1);
+  _pubPosSensorHead   = _nh.advertise<francor_msgs::SensorHeadCmd>("/sensor_head/set_pos", 1);
 
   //inti subscriber
   _subJoy           = _nh.subscribe("joy", 1, &FrancorJoy2Vel::subJoy_callback, this);
@@ -134,10 +154,15 @@ void FrancorJoy2Vel::loop_callback(const ros::TimerEvent& e)
     empty.twist.linear.x = 0.0;
     empty.twist.linear.y = 0.0;
     empty.twist.angular.z = 0.0;
-    _pubTwist.publish(empty);
+    _pubTwist.publish(empty.twist);
     return;
   }
-  _pubTwist.publish(_joy_mapper->toTwistStamped(_max_lin_vel, _max_ang_vel));
+  
+  //for buttons
+  _joy_mapper->triggerBtn_callbacks();
+
+  _pubSpeedSensorHead.publish(_joy_mapper->toSensorHeadCmd(_max_sh_vel));
+  _pubTwist.publish(_joy_mapper->toTwistStamped(_max_lin_vel, _max_ang_vel).twist);
 }
 
 
