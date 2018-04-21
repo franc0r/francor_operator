@@ -66,8 +66,18 @@ protected:
     //rot *= rot;
     rot *= sign;
 
+    double rot_up     = joy_msg.axes[1];
+    sign = rot_up < 0 ? -1 : 1;
+    rot_up /= 0.85;
+    rot_up = (std::abs(rot_up) > 1 ? 1 : rot_up);
+
+    rot_up = std::abs(rot_up);
+    //rot_up *= rot_up;
+    rot_up *= sign;
+
     input.vel_lin_x = forward + back;
     input.vel_ang   = rot;
+    input.vel_ang_up = rot_up * -1;
 
     //sensor head
     double sh_pan = joy_msg.axes[3];

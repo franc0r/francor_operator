@@ -73,17 +73,27 @@ FrancorJoy2Vel::FrancorJoy2Vel()
 
   _joy_mapper->attach_callback(francor::btn::TR_L, std::bind(&FrancorJoy2Vel::btn_trigger_left_pressed, this));
   _joy_mapper->attach_callback(francor::btn::TR_R, std::bind(&FrancorJoy2Vel::btn_trigger_right_pressed, this));
-  _joy_mapper->attach_callback(francor::btn::X, std::bind(&FrancorJoy2Vel::btn_x_pressed, this));
-  _joy_mapper->attach_callback(francor::btn::Y, std::bind(&FrancorJoy2Vel::btn_y_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::X,    std::bind(&FrancorJoy2Vel::btn_x_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::Y,    std::bind(&FrancorJoy2Vel::btn_y_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::A,    std::bind(&FrancorJoy2Vel::btn_a_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::B,    std::bind(&FrancorJoy2Vel::btn_b_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::JS_L, std::bind(&FrancorJoy2Vel::btn_joystick_left_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::JS_R, std::bind(&FrancorJoy2Vel::btn_joystick_right_pressed, this));
 
   //init publisher
+  _pubMode            = _nh.advertise<std_msgs::String>("joy2vel/mode", 1);
   _pubTwist           = _nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
   _pubSpeedSensorHead = _nh.advertise<francor_msgs::SensorHeadCmd>("/sensor_head/set_speed", 1);
   _pubPosSensorHead   = _nh.advertise<francor_msgs::SensorHeadCmd>("/sensor_head/set_pos", 1);
-
+  _pubRoboticArm      = _nh.advertise<std_msgs::Float64MultiArray>("robotic_arm/set_joint_speed", 1);
   //inti subscriber
   _subJoy           = _nh.subscribe("joy", 1, &FrancorJoy2Vel::subJoy_callback, this);
   _subDiagonstics   = _nh.subscribe("/diagnostics", 1, &FrancorJoy2Vel::subDiagnostic_callback, this);
+
+  _srv_robotic_arm_stand_by = _nh.serviceClient<std_srvs::Empty>("/robotic_arm/set_stand_by");
+  _srv_robotic_arm_active   = _nh.serviceClient<std_srvs::Empty>("/robotic_arm/set_active");
+
+  _mode = DRIVE;
 }
 
 FrancorJoy2Vel::~FrancorJoy2Vel()
@@ -92,7 +102,8 @@ FrancorJoy2Vel::~FrancorJoy2Vel()
 void FrancorJoy2Vel::start()
 {
   //create timer
-  _loopTimer = _nh.createTimer(ros::Duration(1 / _rate), &FrancorJoy2Vel::loop_callback, this);
+  _loopTimer     = _nh.createTimer(ros::Duration(1 / _rate), &FrancorJoy2Vel::loop_callback, this);
+  _loopModeTimer = _nh.createTimer(ros::Duration(0.1), &FrancorJoy2Vel::loop_mode_callback, this);
   this->run();
 }
 
@@ -149,23 +160,59 @@ void FrancorJoy2Vel::loop_callback(const ros::TimerEvent& e)
       ROS_INFO("Joystick initialized...");
     }
     //pub empty twist
-    geometry_msgs::TwistStamped empty;
-    empty.header.stamp = ros::Time::now();
-    empty.twist.linear.x = 0.0;
-    empty.twist.linear.y = 0.0;
-    empty.twist.angular.z = 0.0;
-    _pubTwist.publish(empty.twist);
+    _pubTwist.publish(this->getEmptyTwist());
+
+
+
     return;
   }
-  
-  //for buttons
-  _joy_mapper->triggerBtn_callbacks();
 
-  _pubSpeedSensorHead.publish(_joy_mapper->toSensorHeadCmd(_max_sh_vel));
-  _pubTwist.publish(_joy_mapper->toTwistStamped(_max_lin_vel, _max_ang_vel).twist);
+  //for buttons
+  _joy_mapper->triggerBtn_callbacks();  
+
+  if(_mode == DRIVE)
+  {
+    _pubSpeedSensorHead.publish(_joy_mapper->toSensorHeadCmd(_max_sh_vel));
+    _pubTwist.publish(_joy_mapper->toTwistStamped(_max_lin_vel, _max_ang_vel).twist);
+  }
+  else if(_mode == MANIPULATE_DIRECT)
+  {
+    _pubRoboticArm.publish(_joy_mapper->toRoboicArmCmd());
+    _pubTwist.publish(this->getEmptyTwist());
+  }
+  else if(_mode == MANIPULATE_INVERSE)
+  {
+
+    _pubTwist.publish(this->getEmptyTwist());
+  }
+
 }
 
-
+void FrancorJoy2Vel::loop_mode_callback(const ros::TimerEvent& e)
+{
+  std_msgs::String msg;
+  if(!_joystick_rdy)
+  {
+    msg.data = "DETACHED_plz_reinit";
+  }
+  else if(_mode == DRIVE)
+  {
+    msg.data = "DRIVE";
+  }
+  else if(_mode == MANIPULATE_DIRECT)
+  {
+    msg.data = "MANIPULATE_DIRECT";
+  }
+  else if(_mode == MANIPULATE_INVERSE)
+  {
+    msg.data = "MANIPULATE_INVERSE";
+  }
+  else
+  {
+    msg.data = "INVALID";
+  }
+  _pubMode.publish(msg);
+}
 
 
 

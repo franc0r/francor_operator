@@ -16,6 +16,7 @@
 #include <sensor_msgs/Joy.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <std_msgs/Float64MultiArray.h>
 
 #include <francor_msgs/SensorHeadCmd.h>
 
@@ -47,11 +48,11 @@ struct JoyInput{
 
   double vel_lin_x = 0.0;
   double vel_lin_y = 0.0;   //for future use ... mecanum..
-  double vel_ang = 0.0;
+  double vel_ang    = 0.0;
+  double vel_ang_up = 0.0;
 
   double vel_sh_pan  = 0.0;
   double vel_sh_tilt = 0.0;
-  //todo vel for sensorhead...
 
   std::vector<bool> btns = std::vector<bool>(btn::NUM_BTN, false);
 };
@@ -105,6 +106,20 @@ public:
 
     cmd.pan  = cmd_pan;
     cmd.tilt = cmd_tilt;
+    return cmd;
+  }
+
+  inline std_msgs::Float64MultiArray toRoboicArmCmd()
+  {
+    std_msgs::Float64MultiArray cmd;
+    cmd.data.resize(6);
+    cmd.data[0] = _input.vel_ang;
+    cmd.data[1] = _input.vel_ang_up;
+    cmd.data[2] = _input.vel_sh_tilt;
+    cmd.data[3] = _input.vel_sh_pan;
+    cmd.data[4] = _input.vel_lin_x;
+    cmd.data[5] = 0.0;//_input.vel_ang;
+
     return cmd;
   }
 
