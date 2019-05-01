@@ -1,5 +1,5 @@
 /**
- * @file   JoyMapSc.h
+ * @file   JoyMapScNative.h
  * @author Michael Schmidpeter
  * @date   2018-03-12
  * @brief  todo
@@ -7,18 +7,21 @@
  * PROJECT: Franc0r
  * @see https://github.com/franc0r/Wiki/wiki
  */
-#ifndef JOYMAPSC_H_
-#define JOYMAPSC_H_
+#ifndef JOYMAPSCNATIVE_H_
+#define JOYMAPSCNATIVE_H_
+
+
+
 
 #include "JoyMap.h"
 
 namespace francor{
 
-class JoyMapSc : public JoyMap{
+class JoyMapScNative : public JoyMap{
 public:
   // inherit from baseclass
   using JoyMap::JoyMap;
-  virtual ~JoyMapSc()
+  virtual ~JoyMapScNative()
   { }
 
   virtual void showInitMsg() const
@@ -36,7 +39,7 @@ protected:
     //2 angular    leftmax:1 , neutral:0, rightmax:-1
     
     // origin value is min->max 1 -> -0.5
-    double forward = joy_msg.axes[5];
+    double forward = joy_msg.axes[6];
     forward -= 1; //set to 0
     forward *= -1; //ivert to 0..1.5
     forward /= 1.5;
@@ -47,7 +50,7 @@ protected:
 
     //ROS_INFO("forward: %f", forward);
 
-    double back    = joy_msg.axes[2];
+    double back    = joy_msg.axes[7];
     back -= 1; //set to 0
     back *= -1; //ivert to 0..1.5
     back /= 1.5;
@@ -63,7 +66,7 @@ protected:
     rot = (std::abs(rot) > 1 ? 1 : rot);
 
     rot = std::abs(rot);
-    rot *= rot;
+    //rot *= rot;
     rot *= sign;
 
     double rot_up     = joy_msg.axes[1];
@@ -108,9 +111,6 @@ protected:
     input.vel_sh_pan = sh_pan;
     input.vel_sh_tilt = sh_tilt;
 
-    //vel res
-    input.vel_res = joy_msg.buttons[0] + joy_msg.buttons[1] * -1;
-
     // input.vel_sh_pan = joy_msg.axes[0];
     // input.vel_sh_tilt = joy_msg.axes[1] * -1.0;
 
@@ -119,7 +119,7 @@ protected:
     // input.init_1 = joy_msg.axes[5];
     // input.init_2 = joy_msg.axes[2];
     // input.init_val = -0.9;
-    if(joy_msg.axes[5] < -0.99 && joy_msg.axes[2] < -0.99)
+    if(joy_msg.axes[6] < -0.99 && joy_msg.axes[7] < -0.99)
     {
       input.init_ok = true;
     }
@@ -133,7 +133,7 @@ protected:
     input.btns[btn::B] = joy_msg.buttons[1];
     input.btns[btn::JS_L] = joy_msg.buttons[9];
     input.btns[btn::JS_R] = joy_msg.buttons[10];
-    input.btns[btn::UP] = joy_msg.axes[7] == 1.0;           //todo
+    input.btns[btn::UP] = joy_msg.buttons[0];           //todo
     input.btns[btn::DOWN] = joy_msg.buttons[0];           //todo
     input.btns[btn::LEFT] = joy_msg.buttons[0];           //todo
     input.btns[btn::RIGHT] = joy_msg.buttons[0];            //todo
@@ -148,4 +148,4 @@ protected:
 
 } //namespace francor
 
-#endif  //JOYMAPSC_H_
+#endif  //JOYMAPSCNATIVE_H_

@@ -54,6 +54,8 @@ struct JoyInput{
   double vel_sh_pan  = 0.0;
   double vel_sh_tilt = 0.0;
 
+  double vel_res = 0.0;
+
   std::vector<bool> btns = std::vector<bool>(btn::NUM_BTN, false);
 };
 
@@ -77,32 +79,32 @@ public:
   virtual ~JoyMap()
   { }
 
-  inline geometry_msgs::TwistStamped toTwistStamped(const double lin_scale = 1.0, const double ang_scale = 1.0) const
+  inline geometry_msgs::TwistStamped toTwistStamped(const double lin_scale = 1.0, const double ang_scale = 1.0, const bool reverse = false) const
   {
     geometry_msgs::TwistStamped twist;
     twist.header.stamp = ros::Time::now();
     twist.twist.angular.z = _input.vel_ang * ang_scale;
-    twist.twist.linear.x  = _input.vel_lin_x * lin_scale;
+    twist.twist.linear.x  = _input.vel_lin_x * lin_scale * (reverse ? -1.0 : 1.0);
     twist.twist.linear.y  = _input.vel_lin_y * lin_scale;
     return twist;
   }
-  inline geometry_msgs::Twist toTwist(const double lin_scale = 1.0, const double ang_scale = 1.0) const
+  inline geometry_msgs::Twist toTwist(const double lin_scale = 1.0, const double ang_scale = 1.0, const bool reverse = false) const
   {
     geometry_msgs::Twist twist;
     twist.angular.z = _input.vel_ang * ang_scale;
-    twist.linear.x  = _input.vel_lin_x * lin_scale;
+    twist.linear.x  = _input.vel_lin_x * lin_scale * (reverse ? -1.0 : 1.0);
     twist.linear.y  = _input.vel_lin_y * lin_scale;
     return twist;
   }
 
-  inline francor_msgs::SensorHeadCmd toSensorHeadCmd(const double scale = 1.0)
+  inline francor_msgs::SensorHeadCmd toSensorHeadCmd(const double scale = 1.0, const bool reverse = false)
   {
     francor_msgs::SensorHeadCmd cmd;
     
     // int16_t cmd_pan  = 500 + 1000 + std::round(1000.0 * _input.vel_sh_pan);
     // int16_t cmd_tilt = 500 + 1000 + std::round(1000.0 * _input.vel_sh_tilt);
     int16_t cmd_pan  = std::round(scale * _input.vel_sh_pan);
-    int16_t cmd_tilt = std::round(scale * _input.vel_sh_tilt);
+    int16_t cmd_tilt = std::round(scale * _input.vel_sh_tilt * (reverse ? -1.0 : 1.0));
 
     cmd.pan  = cmd_pan;
     cmd.tilt = cmd_tilt;
@@ -118,7 +120,7 @@ public:
     cmd.data[2] = _input.vel_sh_tilt;
     cmd.data[3] = _input.vel_sh_pan;
     cmd.data[4] = _input.vel_lin_x;
-    cmd.data[5] = 0.0;//_input.vel_ang;
+    cmd.data[5] = _input.vel_res;
 
     return cmd;
   }

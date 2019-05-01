@@ -28,6 +28,9 @@ FrancorJoy2Vel::FrancorJoy2Vel()
   int pan_default;
   int tilt_default;
 
+  std::string front_cam_topic;
+  std::string back_cam_topic;
+
   privNh.param(         "joy_map" ,        joy_map,   std::string("default"));
   privNh.param<double>( "rate" ,           rate,          50.0);
   privNh.param<double>( "max_lin_vel" ,    max_lin_vel,   1.0);
@@ -36,7 +39,10 @@ FrancorJoy2Vel::FrancorJoy2Vel()
   privNh.param<double>( "dead_zone_sh" ,   dead_zone_sh,  0.3);
 
   privNh.param<int>(    "pan_default"    ,    pan_default   ,   0);
-  privNh.param<int>(    "tilt_default"    ,    tilt_default   ,   20);
+  privNh.param<int>(    "tilt_default"    ,   tilt_default   ,   20);
+
+  privNh.param(         "front_cam_topic" ,   front_cam_topic,   std::string("/front_cam/image_raw/compressed"));
+  privNh.param(         "back_cam_topic" ,    back_cam_topic,   std::string("/back_cam/image_raw/compressed"));
   // privNh.param<bool>(   "bool_val"   ,    bool_val  ,   true);
 
   _max_lin_vel = max_lin_vel;
@@ -45,6 +51,9 @@ FrancorJoy2Vel::FrancorJoy2Vel()
 
   _sh_default.pan  = pan_default;
   _sh_default.tilt = tilt_default;
+
+  _front_cam_topic = front_cam_topic;
+  _back_cam_topic  = back_cam_topic;
 
   _rate = rate;
   if(rate < 1.0)
@@ -65,8 +74,8 @@ FrancorJoy2Vel::FrancorJoy2Vel()
   }
   else
   {
-    ROS_INFO("Create Default mapper (Steamcontroller)");
-    _joy_mapper = std::make_unique<francor::JoyMapSc>(dead_zone_sh);
+    ROS_INFO("Create Default mapper (Ps4)");
+    _joy_mapper = std::make_unique<francor::JoyMapPs4>(dead_zone_sh);
   }
 
   _joy_mapper->showInitMsg();
@@ -79,13 +88,17 @@ FrancorJoy2Vel::FrancorJoy2Vel()
   _joy_mapper->attach_callback(francor::btn::B,    std::bind(&FrancorJoy2Vel::btn_b_pressed, this));
   _joy_mapper->attach_callback(francor::btn::JS_L, std::bind(&FrancorJoy2Vel::btn_joystick_left_pressed, this));
   _joy_mapper->attach_callback(francor::btn::JS_R, std::bind(&FrancorJoy2Vel::btn_joystick_right_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::UP,   std::bind(&FrancorJoy2Vel::btn_up_pressed, this));
 
   //init publisher
-  _pubMode            = _nh.advertise<std_msgs::String>("joy2vel/mode", 1);
+  _pubMode            = _nh.advertise<std_msgs::String>           ("joy2vel/mode", 1);
+  _pubTwistStamped    = _nh.advertise<geometry_msgs::TwistStamped>("cmd_vel/stamped", 1);
   _pubTwist           = _nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
   _pubSpeedSensorHead = _nh.advertise<francor_msgs::SensorHeadCmd>("/sensor_head/set_speed", 1);
   _pubPosSensorHead   = _nh.advertise<francor_msgs::SensorHeadCmd>("/sensor_head/set_pos", 1);
   _pubRoboticArm      = _nh.advertise<std_msgs::Float64MultiArray>("robotic_arm/set_joint_speed", 1);
+  _pubDriveAction     = _nh.advertise<std_msgs::String>           ("drive/action", 1);
+  _pubAddVictim       = _nh.advertise<std_msgs::Bool>             ("francor/add_victim", 1);
   //inti subscriber
   _subJoy           = _nh.subscribe("joy", 1, &FrancorJoy2Vel::subJoy_callback, this);
   _subDiagonstics   = _nh.subscribe("/diagnostics", 1, &FrancorJoy2Vel::subDiagnostic_callback, this);
@@ -93,6 +106,9 @@ FrancorJoy2Vel::FrancorJoy2Vel()
   _srv_robotic_arm_stand_by = _nh.serviceClient<std_srvs::Empty>("/robotic_arm/set_stand_by");
   _srv_robotic_arm_active   = _nh.serviceClient<std_srvs::Empty>("/robotic_arm/set_active");
 
+  _srv_sw_drive_image       = _nh.serviceClient<topic_tools::MuxSelect>("/mux/select");
+
+  _reverse_drive = false;
   _mode = DRIVE;
 }
 
@@ -160,11 +176,41 @@ void FrancorJoy2Vel::loop_callback(const ros::TimerEvent& e)
       ROS_INFO("Joystick initialized...");
     }
     //pub empty twist
-    _pubTwist.publish(this->getEmptyTwist());
+    _pubTwistStamped.publish(this->getEmptyTwist());
+    _pubTwist.publish(this->getEmptyTwist().twist);
 
-
-
+    _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_NONE));
     return;
+  }
+
+  //drive action
+  if(_mode == DRIVE)
+  {
+    if(_joy_mapper->getJoyInput().btns[francor::btn::A])
+    {
+      _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_CLIMP));
+    }
+    else if(_joy_mapper->getJoyInput().btns[francor::btn::X])
+    {
+      _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_BOGIE_UP_BOOSTED));
+    }
+    else if(_joy_mapper->getJoyInput().btns[francor::btn::Y])
+    {
+      //prove if moving
+      if(_joy_mapper->getJoyInput().vel_ang == 0.0 && _joy_mapper->getJoyInput().vel_lin_x == 0.0) 
+      {//no movement
+        _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_BOGIE_UP));
+      }
+      else
+      {//movement
+        _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_BOGIE_UP_DRIVE));
+      }
+    }
+    else
+    {
+      _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_NONE));
+    }
+    
   }
 
   //for buttons
@@ -172,18 +218,21 @@ void FrancorJoy2Vel::loop_callback(const ros::TimerEvent& e)
 
   if(_mode == DRIVE)
   {
-    _pubSpeedSensorHead.publish(_joy_mapper->toSensorHeadCmd(_max_sh_vel));
-    _pubTwist.publish(_joy_mapper->toTwistStamped(_max_lin_vel, _max_ang_vel).twist);
+    _pubSpeedSensorHead.publish(_joy_mapper->toSensorHeadCmd(_max_sh_vel, _reverse_drive));
+    _pubTwistStamped.publish(_joy_mapper->toTwistStamped(_max_lin_vel, _max_ang_vel, _reverse_drive));
+    _pubTwist.publish(_joy_mapper->toTwistStamped(_max_lin_vel, _max_ang_vel, _reverse_drive).twist);
   }
   else if(_mode == MANIPULATE_DIRECT)
   {
     _pubRoboticArm.publish(_joy_mapper->toRoboicArmCmd());
-    _pubTwist.publish(this->getEmptyTwist());
+    _pubTwistStamped.publish(this->getEmptyTwist());
+    _pubTwist.publish(this->getEmptyTwist().twist);
   }
   else if(_mode == MANIPULATE_INVERSE)
   {
 
-    _pubTwist.publish(this->getEmptyTwist());
+    _pubTwistStamped.publish(this->getEmptyTwist());
+    _pubTwist.publish(this->getEmptyTwist().twist);
   }
 
 }

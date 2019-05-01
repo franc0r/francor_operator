@@ -1,5 +1,5 @@
 /**
- * @file   JoyMapSc.h
+ * @file   JoyMapPs4.h
  * @author Michael Schmidpeter
  * @date   2018-03-12
  * @brief  todo
@@ -7,18 +7,21 @@
  * PROJECT: Franc0r
  * @see https://github.com/franc0r/Wiki/wiki
  */
-#ifndef JOYMAPSC_H_
-#define JOYMAPSC_H_
+#ifndef JOYMAPPS4_H_
+#define JOYMAPPS4_H_
+
+
+
 
 #include "JoyMap.h"
 
 namespace francor{
 
-class JoyMapSc : public JoyMap{
+class JoyMapPs4 : public JoyMap{
 public:
   // inherit from baseclass
   using JoyMap::JoyMap;
-  virtual ~JoyMapSc()
+  virtual ~JoyMapPs4()
   { }
 
   virtual void showInitMsg() const
@@ -131,8 +134,8 @@ protected:
     input.btns[btn::Y] = joy_msg.buttons[3];
     input.btns[btn::A] = joy_msg.buttons[0];
     input.btns[btn::B] = joy_msg.buttons[1];
-    input.btns[btn::JS_L] = joy_msg.buttons[9];
-    input.btns[btn::JS_R] = joy_msg.buttons[10];
+    input.btns[btn::JS_L] = joy_msg.buttons[11];
+    input.btns[btn::JS_R] = joy_msg.buttons[12];
     input.btns[btn::UP] = joy_msg.axes[7] == 1.0;           //todo
     input.btns[btn::DOWN] = joy_msg.buttons[0];           //todo
     input.btns[btn::LEFT] = joy_msg.buttons[0];           //todo
@@ -148,4 +151,4 @@ protected:
 
 } //namespace francor
 
-#endif  //JOYMAPSC_H_
+#endif  //JOYMAPPS4_H_
