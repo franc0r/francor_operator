@@ -14,6 +14,7 @@
 #include <QProcess>
 #include <QProgressBar>
 #include <QTimer>
+#include <QLabel>
 
 namespace my_namespace
 {
@@ -32,11 +33,15 @@ MyPlugin::MyPlugin()
   this->connect(stopButton, SIGNAL(pressed()), this, SLOT(stop()));
 
   // co2 sensor value bars
+  auto textBarFast = new QLabel("CO2 Sensor (fast)");
+  layout->addWidget(textBarFast);
   _co2bar_fast = new QProgressBar;
   _co2bar_fast->setMaximum(20);
   _co2bar_fast->setMinimum(0);
   layout->addWidget(_co2bar_fast);
 
+  auto textBarSlow = new QLabel("CO2 Sensor (slow)");
+  layout->addWidget(textBarSlow);
   _co2bar_slow = new QProgressBar;
   _co2bar_slow->setMaximum(1024);
   _co2bar_slow->setMinimum(0);
