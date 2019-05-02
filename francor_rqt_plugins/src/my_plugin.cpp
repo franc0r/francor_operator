@@ -15,6 +15,7 @@
 #include <QProgressBar>
 #include <QTimer>
 #include <QLabel>
+#include <QLineEdit>
 
 namespace my_namespace
 {
@@ -47,13 +48,39 @@ MyPlugin::MyPlugin()
   _co2bar_slow->setMinimum(0);
   layout->addWidget(_co2bar_slow);
 
-  widget_->setLayout(layout);
-  widget_->show();
-
 #ifndef Q_MOC_RUN
+  // co2 sensor value subscriber
   _sub_co2_fast = _nh.subscribe("/sensor_co2_fast", 2, &MyPlugin::callbackCo2SensorFast, this);
   _sub_co2_slow = _nh.subscribe("/sensor_co2_slow", 2, &MyPlugin::callbackCo2SensorSlow, this);
+
+  // info text subscriber
+  _sub_info_a = _nh.subscribe("info_text_a", 2, &MyPlugin::callbackInfoTextA, this);
+  _sub_info_b = _nh.subscribe("info_text_b", 2, &MyPlugin::callbackInfoTextB, this);
+  _sub_info_c = _nh.subscribe("info_text_c", 2, &MyPlugin::callbackInfoTextC, this);
 #endif
+
+  // info texts
+  auto textInfoTextA = new QLabel(_sub_info_a.getTopic().c_str());
+  layout->addWidget(textInfoTextA);
+  _info_text_a = new QLineEdit;
+  _info_text_a->setReadOnly(true);
+  layout->addWidget(_info_text_a);
+
+  auto textInfoTextB = new QLabel(_sub_info_b.getTopic().c_str());
+  layout->addWidget(textInfoTextB);
+  _info_text_b = new QLineEdit;
+  _info_text_b->setReadOnly(true);
+  layout->addWidget(_info_text_b);
+
+  auto textInfoTextC = new QLabel(_sub_info_c.getTopic().c_str());
+  layout->addWidget(textInfoTextC);
+  _info_text_c = new QLineEdit;
+  _info_text_c->setReadOnly(true);
+  layout->addWidget(_info_text_c);
+  
+  // set layout and show final configured widget
+  widget_->setLayout(layout);
+  widget_->show();
 
   // start timer with a period of 100 ms
   auto timer = new QTimer(this);
@@ -87,6 +114,21 @@ void MyPlugin::callbackCo2SensorSlow(const std_msgs::Int32& msg)
   _co2bar_slow->setValue(msg.data);
   // _co2bar_slow->update();
   // widget_->update();
+}
+
+void MyPlugin::callbackInfoTextA(const std_msgs::String& msg)
+{
+  _info_text_a->setText(msg.data.c_str());
+}
+
+void MyPlugin::callbackInfoTextB(const std_msgs::String& msg)
+{
+  _info_text_b->setText(msg.data.c_str());
+}
+
+void MyPlugin::callbackInfoTextC(const std_msgs::String& msg)
+{
+  _info_text_c->setText(msg.data.c_str());  
 }
 #endif
 
