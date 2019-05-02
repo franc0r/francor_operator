@@ -63,9 +63,8 @@ void MyPlugin::process(void)
 #ifndef Q_MOC_RUN
 void MyPlugin::callbackCo2Sensor(const std_msgs::Int32& msg)
 {
-  std::cout << "co2 value = " << msg.data << std::endl;
   _co2bar->setValue(msg.data);
-  widget_->update();
+  // widget_->update();
 }
 #endif
 
