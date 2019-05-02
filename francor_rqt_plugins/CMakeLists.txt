@@ -136,7 +136,10 @@ qt4_wrap_cpp(rqt_rviz_MOCS src/my_plugin.h)
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(my_plugin src/my_plugin.cpp)
+add_executable(my_plugin
+  src/my_plugin.cpp
+  ${rqt_rviz_MOCS}
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

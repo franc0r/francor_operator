@@ -16,6 +16,9 @@ public:
   MyPlugin(void);
   virtual ~MyPlugin(void) = default;
 
+public slots:
+  void stop(void);
+
 private: 
   // Ui::MyPluginWidget ui_; 
   QWidget* widget_; 

@@ -26,9 +26,16 @@ MyPlugin::MyPlugin()
   auto stopButton = new QPushButton(QIcon("/home/knueppl/ros/francor/src/francor_operator/francor_rqt_plugins/icon/icon-stop.png"), "");
   stopButton->setMinimumSize(256, 256);
   layout->addWidget(stopButton);
+  this->connect(stopButton, SIGNAL(pressed()), this, SLOT(stop()));
 
   widget_->setLayout(layout);
   widget_->show();
+}
+
+void MyPlugin::stop(void)
+{
+  ROS_FATAL("Emergency Stop! Kill drive node!");
+  QProcess::execute("rosnode", QStringList() << "kill" << "\francor_drivers_node");
 }
 
 } // end namespace 
