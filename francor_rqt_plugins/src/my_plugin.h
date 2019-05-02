@@ -29,17 +29,20 @@ public slots:
   void process(void);
 
 private: 
-  void callbackCo2Sensor(const std_msgs::Int32& msg);
+  void callbackCo2SensorFast(const std_msgs::Int32& msg);
+  void callbackCo2SensorSlow(const std_msgs::Int32& msg);
 
   // Ui::MyPluginWidget ui_; 
   QWidget* widget_;
-  QProgressBar* _co2bar;
+  QProgressBar* _co2bar_fast;
+  QProgressBar* _co2bar_slow;
 
 #ifndef Q_MOC_RUN
   ros::NodeHandle _priv_nh;
   ros::NodeHandle _nh;
 
-  ros::Subscriber _sub_co2;
+  ros::Subscriber _sub_co2_fast;
+  ros::Subscriber _sub_co2_slow;
 #endif
 };
 

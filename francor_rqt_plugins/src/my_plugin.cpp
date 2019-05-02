@@ -31,16 +31,23 @@ MyPlugin::MyPlugin()
   layout->addWidget(stopButton);
   this->connect(stopButton, SIGNAL(pressed()), this, SLOT(stop()));
 
-  _co2bar = new QProgressBar;
-  _co2bar->setMaximum(1024);
-  _co2bar->setMinimum(0);
-  layout->addWidget(_co2bar);
+  // co2 sensor value bars
+  _co2bar_fast = new QProgressBar;
+  _co2bar_fast->setMaximum(1024);
+  _co2bar_fast->setMinimum(0);
+  layout->addWidget(_co2bar_fast);
+
+  _co2bar_slow = new QProgressBar;
+  _co2bar_slow->setMaximum(1024);
+  _co2bar_slow->setMinimum(0);
+  layout->addWidget(_co2bar_slow);
 
   widget_->setLayout(layout);
   widget_->show();
 
 #ifndef Q_MOC_RUN
-  _sub_co2 = _nh.subscribe("/sensor_co2/fast", 2, &MyPlugin::callbackCo2Sensor, this);
+  _sub_co2_fast = _nh.subscribe("/sensor_co2/fast", 2, &MyPlugin::callbackCo2SensorFast, this);
+  _sub_co2_slow = _nh.subscribe("/sensor_co2/slow", 2, &MyPlugin::callbackCo2SensorSlow, this);
 #endif
 
   // start timer with a period of 100 ms
@@ -61,9 +68,15 @@ void MyPlugin::process(void)
 }
 
 #ifndef Q_MOC_RUN
-void MyPlugin::callbackCo2Sensor(const std_msgs::Int32& msg)
+void MyPlugin::callbackCo2SensorFast(const std_msgs::Int32& msg)
 {
-  _co2bar->setValue(msg.data);
+  _co2bar_fast->setValue(msg.data);
+  // widget_->update();
+}
+
+void MyPlugin::callbackCo2SensorSlow(const std_msgs::Int32& msg)
+{
+  _co2bar_slow->setValue(msg.data);
   // widget_->update();
 }
 #endif
