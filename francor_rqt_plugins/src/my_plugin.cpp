@@ -39,13 +39,15 @@ MyPlugin::MyPlugin()
   _co2bar_fast = new QProgressBar;
   _co2bar_fast->setMaximum(20);
   _co2bar_fast->setMinimum(0);
+  // _co2bar_fast->setFormat("%v ppm");
   layout->addWidget(_co2bar_fast);
 
   auto textBarSlow = new QLabel("CO2 Sensor (slow)");
   layout->addWidget(textBarSlow);
   _co2bar_slow = new QProgressBar;
-  _co2bar_slow->setMaximum(1024);
+  _co2bar_slow->setMaximum(2048);
   _co2bar_slow->setMinimum(0);
+  _co2bar_slow->setFormat("%v ppm");
   layout->addWidget(_co2bar_slow);
 
 #ifndef Q_MOC_RUN
@@ -102,7 +104,7 @@ void MyPlugin::process(void)
 #ifndef Q_MOC_RUN
 void MyPlugin::callbackCo2SensorFast(const std_msgs::Int32& msg)
 {
-  ROS_INFO_STREAM("fast: " << msg.data);
+  ROS_INFO_STREAM("co2 sensor (fast): " << msg.data);
   _co2bar_fast->setValue(msg.data);
   // _co2bar_fast->update();
   //widget_->update();
@@ -110,8 +112,9 @@ void MyPlugin::callbackCo2SensorFast(const std_msgs::Int32& msg)
 
 void MyPlugin::callbackCo2SensorSlow(const std_msgs::Int32& msg)
 {
-  ROS_INFO_STREAM("slow: " << msg.data);
-  _co2bar_slow->setValue(msg.data);
+  ROS_INFO_STREAM("c02 sensor (slow): " << msg.data << " ppm");
+  // necessary to convert value correctly
+  _co2bar_slow->setValue(msg.data * 2.0);
   // _co2bar_slow->update();
   // widget_->update();
 }
