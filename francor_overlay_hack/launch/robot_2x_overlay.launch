@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<launch>
+
+
+  <!-- front cam -->
+  <node name="francor_overlay_hack_node" pkg="francor_overlay_hack" type="francor_overlay_hack_node" output="screen">
+    <param name="start_x"      type="double" value="551.0"   />
+    <param name="start_y"      type="double" value="416.0"   />
+    <param name="end_x"        type="double" value="480.0 "   />
+    <param name="end_y"        type="double" value="173.0"   />
+    <param name="image_transport" value="raw"/>
+    
+    <!-- todo remap -->
+    <remap from="/camera/image" to="/front_cam/image_raw"/>
+    <remap from="/driver/overlay" to="/front_cam/image_raw/overlay"/>
+  </node>
+
+
+  <!-- back cam -->
+  <node name="francor_overlay_hack_node" pkg="francor_overlay_hack" type="francor_overlay_hack_node" output="screen">
+    <param name="start_x"      type="double" value="518.0"   />
+    <param name="start_y"      type="double" value="485.0"   />
+    <param name="end_x"        type="double" value="455.0 "   />
+    <param name="end_y"        type="double" value="288.0"   />
+    <param name="image_transport" value="raw"/>
+    
+    <!-- todo remap -->
+    <remap from="/camera/image" to="/back_cam/image_raw"/>
+    <remap from="/driver/overlay" to="/back_cam/image_raw/overlay"/>
+  </node>
+
+</launch>
