@@ -28,6 +28,7 @@ public:
 
 public slots:
   void stop(void);
+  void stopSlam(void);
   void process(void);
 
 private: 

@@ -33,6 +33,12 @@ MyPlugin::MyPlugin()
   layout->addWidget(stopButton);
   this->connect(stopButton, SIGNAL(pressed()), this, SLOT(stop()));
 
+  // stop slam service
+  auto stopSlamButton = new QPushButton("STOP SLAM");
+  stopSlamButton->setMinimumHeight(64);
+  layout->addWidget(stopSlamButton);
+  this->connect(stopSlamButton, SIGNAL(pressed()), this, SLOT(stopSlam()));
+
   // co2 sensor value bars
   auto textBarFast = new QLabel("CO2 Sensor (fast)");
   layout->addWidget(textBarFast);
@@ -92,8 +98,14 @@ MyPlugin::MyPlugin()
 
 void MyPlugin::stop(void)
 {
-  ROS_FATAL("Emergency Stop! Kill drive node!");
+  ROS_INFO("Emergency Stop! Kill drive node!");
   QProcess::execute("rosnode", QStringList() << "kill" << "francor_drives_node");
+}
+
+void MyPlugin::stopSlam(void)
+{
+  ROS_INFO("Stop SLAM by killing it.");
+  QProcess::execute("rosnode", QStringList() << "kill" << "/slam_node");
 }
 
 void MyPlugin::process(void)
