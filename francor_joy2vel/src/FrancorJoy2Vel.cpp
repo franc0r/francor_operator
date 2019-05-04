@@ -109,6 +109,9 @@ FrancorJoy2Vel::FrancorJoy2Vel()
   _srv_sw_drive_image       = _nh.serviceClient<topic_tools::MuxSelect>("/mux/select");
 
   _reverse_drive = false;
+
+  _twist_enabled = true;
+
   _mode = DRIVE;
 }
 
@@ -176,42 +179,44 @@ void FrancorJoy2Vel::loop_callback(const ros::TimerEvent& e)
       ROS_INFO("Joystick initialized...");
     }
     //pub empty twist
-    _pubTwistStamped.publish(this->getEmptyTwist());
-    _pubTwist.publish(this->getEmptyTwist().twist);
-
-    _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_NONE));
+    if(_twist_enabled)
+    {
+      _pubTwistStamped.publish(this->getEmptyTwist());
+      _pubTwist.publish(this->getEmptyTwist().twist);
+    }
+    // _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_NONE));
     return;
   }
 
   //drive action
-  if(_mode == DRIVE)
-  {
-    if(_joy_mapper->getJoyInput().btns[francor::btn::A])
-    {
-      _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_CLIMP));
-    }
-    else if(_joy_mapper->getJoyInput().btns[francor::btn::X])
-    {
-      _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_BOGIE_UP_BOOSTED));
-    }
-    else if(_joy_mapper->getJoyInput().btns[francor::btn::Y])
-    {
-      //prove if moving
-      if(_joy_mapper->getJoyInput().vel_ang == 0.0 && _joy_mapper->getJoyInput().vel_lin_x == 0.0) 
-      {//no movement
-        _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_BOGIE_UP));
-      }
-      else
-      {//movement
-        _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_BOGIE_UP_DRIVE));
-      }
-    }
-    else
-    {
-      _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_NONE));
-    }
+  // if(_mode == DRIVE)
+  // {
+  //   if(_joy_mapper->getJoyInput().btns[francor::btn::A])
+  //   {
+  //     _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_CLIMP));
+  //   }
+  //   else if(_joy_mapper->getJoyInput().btns[francor::btn::X])
+  //   {
+  //     _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_BOGIE_UP_BOOSTED));
+  //   }
+  //   else if(_joy_mapper->getJoyInput().btns[francor::btn::Y])
+  //   {
+  //     //prove if moving
+  //     if(_joy_mapper->getJoyInput().vel_ang == 0.0 && _joy_mapper->getJoyInput().vel_lin_x == 0.0) 
+  //     {//no movement
+  //       _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_BOGIE_UP));
+  //     }
+  //     else
+  //     {//movement
+  //       _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_BOGIE_UP_DRIVE));
+  //     }
+  //   }
+  //   else
+  //   {
+  //     _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_NONE));
+  //   }
     
-  }
+  // }
 
   //for buttons
   _joy_mapper->triggerBtn_callbacks();  
@@ -219,8 +224,11 @@ void FrancorJoy2Vel::loop_callback(const ros::TimerEvent& e)
   if(_mode == DRIVE)
   {
     _pubSpeedSensorHead.publish(_joy_mapper->toSensorHeadCmd(_max_sh_vel, _reverse_drive));
-    _pubTwistStamped.publish(_joy_mapper->toTwistStamped(_max_lin_vel, _max_ang_vel, _reverse_drive));
-    _pubTwist.publish(_joy_mapper->toTwistStamped(_max_lin_vel, _max_ang_vel, _reverse_drive).twist);
+    if(_twist_enabled)
+    {
+      _pubTwistStamped.publish(_joy_mapper->toTwistStamped(_max_lin_vel, _max_ang_vel, _reverse_drive));
+      _pubTwist.publish(_joy_mapper->toTwistStamped(_max_lin_vel, _max_ang_vel, _reverse_drive).twist);
+    }
   }
   else if(_mode == MANIPULATE_DIRECT)
   {
@@ -246,7 +254,15 @@ void FrancorJoy2Vel::loop_mode_callback(const ros::TimerEvent& e)
   }
   else if(_mode == DRIVE)
   {
-    msg.data = "DRIVE";
+    if(_twist_enabled)
+    {
+      msg.data = "DRIVE - ENABLED";
+    }
+    else
+    {
+      msg.data = "DRIVE - DISABLED";
+    }
+    
   }
   else if(_mode == MANIPULATE_DIRECT)
   {

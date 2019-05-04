@@ -145,6 +145,20 @@ private:    //functions
   void btn_x_pressed()
   {
     ROS_INFO("Button x");
+    if(_mode == DRIVE)
+    {
+      //disable / enable Twist;
+      if(_twist_enabled)
+      {
+        ROS_INFO("Disable Twist");
+        _twist_enabled = false;
+      }
+      else
+      {
+        ROS_INFO("Enable Twist");
+        _twist_enabled = true;
+      }
+    }
   }
   void btn_y_pressed()
   {
@@ -270,6 +284,8 @@ private:    //dataelements
   enum_modes _mode;
 
   bool _reverse_drive;
+
+  bool _twist_enabled;
 
   std::string _front_cam_topic;
   std::string _back_cam_topic;

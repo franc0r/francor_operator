@@ -32,6 +32,12 @@ protected:
   virtual JoyInput map_input(const sensor_msgs::Joy& joy_msg)
   {
 
+    const double lin_fac_1 = 0.3;
+    const double lin_fac_2 = 0.7;
+
+    const double rot_fac_1 = 0.5;
+    const double rot_fac_2 = 0.5;
+
     JoyInput input;
     // -- velocity ------
     //5 forward    neutral:+1 max:-0.5
@@ -46,7 +52,7 @@ protected:
 
     forward = (forward > 1 ? 1 : forward);
 
-    forward *= forward;
+    forward *= lin_fac_1 * forward + lin_fac_2 * forward * forward;
 
     //ROS_INFO("forward: %f", forward);
 
@@ -57,7 +63,8 @@ protected:
 
     back = (back > 1 ? 1 : back);
 
-    back *= back; //scale parabola
+    back *= lin_fac_1 * back + lin_fac_2 * back * back;
+
     back *= -1;
 
     double rot     = joy_msg.axes[0];
@@ -66,7 +73,8 @@ protected:
     rot = (std::abs(rot) > 1 ? 1 : rot);
 
     rot = std::abs(rot);
-    rot *= rot;
+    rot *= rot_fac_1 * rot + rot_fac_2 * rot * rot;
+
     rot *= sign;
 
     double rot_up     = joy_msg.axes[1];
@@ -84,7 +92,7 @@ protected:
 
     //sensor head
     double sh_pan = joy_msg.axes[3];
-    double sh_tilt = joy_msg.axes[4] * -1.0;
+    double sh_tilt = joy_msg.axes[4];
     if(sh_pan != 0.0 && sh_tilt != 0.0)
     {
       double sh_pan_sgn = this->signum(sh_pan);

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- joy2vel node -->
+  <node name="francor_overlay_hack_node" pkg="francor_overlay_hack" type="francor_overlay_hack_node" output="screen">
+    <param name="start_x"      type="double" value="551.0"   />
+    <param name="start_y"      type="double" value="416.0"   />
+    <param name="end_x"        type="double" value="480.0 "   />
+    <param name="end_y"        type="double" value="173.0"   />
+    <param name="image_transport" value="compressed"/>
+    
+    <remap from="/camera/image/compressed" to="/drive_cam/compressed"/>
+
+  </node>
+
+  <!-- <node name="start_scd_sh" pkg="francor_joy2vel" type="start_scd.sh" output="screen"/> -->
+
+</launch>
