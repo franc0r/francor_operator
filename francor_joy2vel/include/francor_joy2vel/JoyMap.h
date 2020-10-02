@@ -111,6 +111,20 @@ public:
     return cmd;
   }
 
+  /**
+   * @brief converts joy to sensorhead speed 
+   * 
+   * @param reverse first = pan, second = tilt
+   * @return std::pair<double, double> 
+   */
+  inline std::pair<double, double> toSensorHeadSpeed(const bool reverse = false)
+  {
+    std::pair<double, double> speed;
+    speed.first  = _input.vel_sh_pan;
+    speed.second = _input.vel_sh_tilt * (reverse ? -1.0 : 1.0);
+    return speed;
+  }
+
   inline std_msgs::Float64MultiArray toRoboicArmCmd()
   {
     std_msgs::Float64MultiArray cmd;

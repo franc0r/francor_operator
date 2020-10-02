@@ -2,7 +2,7 @@
 <launch>
 
   <!-- joy2vel node -->
-  <node name="francor_gui" pkg="francor_rqt_plugins" type="my_plugin" output="screen">
+  <node name="francor_gui" pkg="francor_rqt_plugins" type="my_plugin" output="log">
 
   <remap from="/info_text_a" to="/joy2vel/mode"/>
   <remap from="/info_text_b" to="/info_text_b"/>

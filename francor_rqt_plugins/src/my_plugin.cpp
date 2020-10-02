@@ -106,6 +106,7 @@ void MyPlugin::stopSlam(void)
 {
   ROS_INFO("Stop SLAM by killing it.");
   QProcess::execute("rosnode", QStringList() << "kill" << "/slam_node");
+  QProcess::execute("rosnode", QStringList() << "kill" << "/francor_victim_node");
 }
 
 void MyPlugin::process(void)

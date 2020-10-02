@@ -2,13 +2,14 @@
 <launch>
 
   <!-- joy node -->
-  <node name="joy_node" pkg="joy" type="joy_node" output="screen">
+  <node name="joy_node_schmiddey" pkg="joy" type="joy_node" output="screen">
     <param name="autorepeat_rate"      type="double" value="50.0 "   />
+    <remap from="/joy" to="/joy_schmiddey" />
   </node>
 
   <!-- joy2vel node -->
   <node name="francor_joy2vel_node" pkg="francor_joy2vel" type="francor_joy2vel_node" output="screen">
-    <param name="joy_maprate"      type="string" value="sc"   />
+    <param name="joy_maprate"      type="string" value="dings"   />
     <param name="rate"             type="double" value="50.0"   />
     <param name="max_lin_vel"      type="double" value="0.6 "   />
     <param name="max_ang_vel"      type="double" value="1.0"   />
@@ -19,11 +20,12 @@
     
     
     
-    <remap from="/cmd_vel" to="/cmd_vel"/>
+    <remap from="/cmd_vel" to="/summit_xl_controller/command"/>
+    <remap from="/joy" to="/joy_schmiddey" />
 
   </node>
 
-  <include file="$(find francor_overlay_hack)/launch/default.launch"/>
+  <!-- <include file="$(find francor_overlay_hack)/launch/default.launch"/> -->
 
   <!-- <node name="start_scd_sh" pkg="francor_joy2vel" type="start_scd.sh" output="screen"/> -->
 

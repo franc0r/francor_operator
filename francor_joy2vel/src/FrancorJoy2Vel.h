@@ -18,6 +18,7 @@
 
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/UInt16.h>
 #include <std_srvs/Empty.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/Joy.h>
@@ -253,6 +254,13 @@ private:    //dataelements
   ros::Publisher _pubDriveAction;
   ros::Publisher _pubAddVictim;
 
+
+  //for testing stuff
+  ros::Publisher _pubAxis0;
+  ros::Publisher _pubAxis1;
+  ros::Publisher _pubAxis2;
+  ros::Publisher _pubAxis3;
+
   ros::Subscriber _subJoy;
   ros::Subscriber _subDiagonstics;
 
@@ -276,6 +284,9 @@ private:    //dataelements
   double _max_ang_vel;
 
   double _max_sh_vel;
+
+  double _axis_factor;
+  double _axis_offset;
 
   francor_msgs::SensorHeadCmd _sh_default;
 

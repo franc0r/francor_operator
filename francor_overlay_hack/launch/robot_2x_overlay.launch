@@ -10,7 +10,7 @@
     <param name="end_y"        type="double" value="173.0"   />
     <param name="image_transport" value="raw"/>
     
-    <!-- todo remap -->
+    <!-- remap -->
     <remap from="/camera/image" to="/front_cam/image_raw"/>
     <remap from="/driver/overlay" to="/front_cam/image_raw/overlay"/>
   </node>
@@ -24,7 +24,7 @@
     <param name="end_y"        type="double" value="288.0"   />
     <param name="image_transport" value="raw"/>
     
-    <!-- todo remap -->
+    <!-- remap -->
     <remap from="/camera/image" to="/back_cam/image_raw"/>
     <remap from="/driver/overlay" to="/back_cam/image_raw/overlay"/>
   </node>
