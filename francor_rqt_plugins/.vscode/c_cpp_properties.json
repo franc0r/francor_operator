@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/m1ch1/workspace/ros/catkin_ws/devel/include",
+                "/opt/ros/melodic/include",
+                "/home/m1ch1/workspace/ros/catkin_ws/src/francor_drives/include",
+                "/home/m1ch1/workspace/ros/catkin_ws/src/francor_operator/francor_joy2vel/include",
+                "/home/m1ch1/workspace/ros/catkin_ws/src/francor_tediore/include",
+                "/usr/include"
+            ],
+            "name": "Linux",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

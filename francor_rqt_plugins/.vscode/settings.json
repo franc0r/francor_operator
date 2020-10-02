@@ -1,0 +1,12 @@
+{
+  "workbench.colorCustomizations": {
+    "editorCursor.foreground": "#ff7b008f",
+    "activityBar.background": "#29187F",
+    "titleBar.activeBackground": "#3A22B1",
+    "titleBar.activeForeground": "#FAF9FE"
+  },
+  "python.autoComplete.extraPaths": [
+    "/home/m1ch1/workspace/ros/catkin_ws/devel/lib/python2.7/dist-packages",
+    "/opt/ros/melodic/lib/python2.7/dist-packages"
+  ]
+}
