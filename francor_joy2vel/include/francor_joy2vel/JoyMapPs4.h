@@ -111,8 +111,10 @@ protected:
       }
 
       sh_pan /= (1 - _dead_zone_sh); //sclae to 1
+      sh_pan *= sh_pan; //add parabola
       sh_pan *= sh_pan_sgn;
       sh_tilt /= (1 - _dead_zone_sh); //sclae to 1
+      sh_tilt *= sh_tilt; //ad parabola
       sh_tilt *= sh_tilt_sgn;
 
     }
@@ -150,7 +152,7 @@ protected:
     input.btns[btn::RIGHT] = joy_msg.buttons[0];            //todo
     input.btns[btn::TR_L] = joy_msg.buttons[4];
     input.btns[btn::TR_R] = joy_msg.buttons[5];
-
+    input.btns[btn::SHARE] = joy_msg.buttons[8];
 
     return input;
   }

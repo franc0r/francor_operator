@@ -19,13 +19,17 @@
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/UInt16.h>
+#include <std_msgs/Float64.h>
 #include <std_srvs/Empty.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/Joy.h>
+#include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/Point.h> //todo prove if needed
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/Twist.h>
 #include <diagnostic_msgs/DiagnosticArray.h>
 #include <topic_tools/MuxSelect.h>
+
 
 #include <francor_joy2vel/JoyMap.h>
 #include <francor_joy2vel/JoyMapSc.h> //steam controller differential
@@ -33,7 +37,7 @@
 
 
 
-#include <francor_msgs/SensorHeadCmd.h>
+#include <francor_msgs/ManipulatorCmd.h>
 
 class FrancorJoy2Vel
 {
@@ -85,42 +89,50 @@ private:    //functions
     return empty;
   }
 
-  francor_msgs::SensorHeadCmd getDefaultSensorHead()
+  //old sh
+  // francor_msgs::SensorHeadCmd getDefaultSensorHead()
+  std_msgs::Float64 getDefaultTiltSensorHead()
   {
-    francor_msgs::SensorHeadCmd cmd = _sh_default;
+    // francor_msgs::SensorHeadCmd cmd = _sh_default;
+    std_msgs::Float64 cmd;
+    cmd.data = _sh_tilt_default;
     if(_reverse_drive)
     {
-      cmd.tilt *= -1;
+      cmd.data *= -1;
     }
     return cmd;
   }
 
 
-  std_msgs::String toDriveAction(const std::string& drive_action)
-  {
-    std_msgs::String msg;
-    msg.data = drive_action;
-    return msg;
-  }
+  // std_msgs::String toDriveAction(const std::string& drive_action)
+  // {
+  //   std_msgs::String msg;
+  //   msg.data = drive_action;
+  //   return msg;
+  // }
 
   void btn_trigger_left_pressed()
   {
     ROS_INFO("Trigger left");
     if(_mode == DRIVE)
     {
-    //  _pubPosSensorHead.publish(_sh_default);
+      std_msgs::Float64 msg;
+      msg.data = 0.0;
+      _pubServoPanPos.publish(msg);
+      _pubServoTiltPos.publish(getDefaultTiltSensorHead());
     }
     else if(_mode == MANIPULATE_DIRECT || _mode == MANIPULATE_INVERSE)
     {
       std_srvs::Empty srv;
-      if(_srv_robotic_arm_active.call(srv))
-      {
-        ROS_INFO("Set arm active");
-      }
-      else
-      {
-        ROS_WARN("Unable to call set arm active Service");
-      }
+      //todo
+      // if(_srv_robotic_arm_active.call(srv))
+      // {
+      //   ROS_INFO("Set arm active");
+      // }
+      // else
+      // {
+      //   ROS_WARN("Unable to call set arm active Service");
+      // }
     }
   }
   void btn_trigger_right_pressed()
@@ -128,19 +140,27 @@ private:    //functions
     ROS_INFO("Trigger right");
     if(_mode == DRIVE)
     {
-      _pubPosSensorHead.publish(this->getDefaultSensorHead());
+      //old sh
+      // _pubPosSensorHead.publish(this->getDefaultSensorHead());
+      //new sh
+      std_msgs::Float64 msg;
+      msg.data = 0.0;
+      _pubServoPanPos.publish(msg);
+      _pubServoTiltPos.publish(this->getDefaultTiltSensorHead());
+
     }
     else if(_mode == MANIPULATE_DIRECT || _mode == MANIPULATE_INVERSE)
     {
+      //todo
       std_srvs::Empty srv;
-      if(_srv_robotic_arm_stand_by.call(srv))
-      {
-        ROS_INFO("Set arm stand by");
-      }
-      else
-      {
-        ROS_WARN("Unable to call set arm stand by Service");
-      }
+      // if(_srv_robotic_arm_stand_by.call(srv))
+      // {
+      //   ROS_INFO("Set arm stand by");
+      // }
+      // else
+      // {
+      //   ROS_WARN("Unable to call set arm stand by Service");
+      // }
     }
   }
   void btn_x_pressed()
@@ -174,9 +194,6 @@ private:    //functions
   void btn_b_pressed()
   {
     ROS_INFO("Button b");
-    std_msgs::Bool msg;
-    msg.data = true;
-    _pubAddVictim.publish(msg);
   }
 
   void btn_joystick_left_pressed()
@@ -186,11 +203,23 @@ private:    //functions
     if(_mode == DRIVE)
     {
       ROS_INFO("Set Mode: MANIPULATE_DIRECT");
+      //call service for axis mode
+      std_srvs::Empty srv;
+      if(!_srv_set_manipulator_axis_mode.call(srv))
+      {
+        ROS_ERROR("Unable to call _srv_set_manipulator_axis_mode ...");
+      }
       _mode = MANIPULATE_DIRECT;
     }
     else if(_mode == MANIPULATE_DIRECT)
     {
       ROS_INFO("Set Mode: MANIPULATE_INVERSE");
+      //call service for inverse mode
+      std_srvs::Empty srv;
+      if(!_srv_set_manipulator_inverse_mode.call(srv))
+      {
+        ROS_ERROR("Unable to call _srv_set_manipulator_inverse_mode ...");
+      }
       _mode = MANIPULATE_INVERSE;
     }
     else if(_mode == MANIPULATE_INVERSE)
@@ -218,7 +247,11 @@ private:    //functions
     //toggle reverse
     _reverse_drive = !_reverse_drive;
     //swich sensorhead to default
-    _pubPosSensorHead.publish(this->getDefaultSensorHead());
+    // _pubPosSensorHead.publish(this->getDefaultSensorHead());
+    std_msgs::Float64 msg;
+    msg.data = 0.0;
+    _pubServoPanPos.publish(msg);
+    _pubServoTiltPos.publish(this->getDefaultTiltSensorHead());
 
     if(_reverse_drive)
     {
@@ -242,32 +275,40 @@ private:    //functions
     }
   }
 
+  void btn_share_pressed()
+  {
+    ROS_INFO("Button share");
+    std_msgs::Bool msg;
+    msg.data = true;
+    _pubAddVictim.publish(msg);
+  }
+
 private:    //dataelements
   ros::NodeHandle _nh;
 
   ros::Publisher _pubMode;
   ros::Publisher _pubTwist;
   ros::Publisher _pubTwistStamped;
-  ros::Publisher _pubSpeedSensorHead;
-  ros::Publisher _pubPosSensorHead;
-  ros::Publisher _pubRoboticArm;
+  ros::Publisher _pubServoPanSpeed;
+  ros::Publisher _pubServoTiltSpeed;
+  ros::Publisher _pubServoPanPos;
+  ros::Publisher _pubServoTiltPos;
   ros::Publisher _pubDriveAction;
+  ros::Publisher _pubManipulatorAxisSpeed;
+  ros::Publisher _pubManipulaotrInverseSpeed;
   ros::Publisher _pubAddVictim;
 
-
-  //for testing stuff
-  ros::Publisher _pubAxis0;
-  ros::Publisher _pubAxis1;
-  ros::Publisher _pubAxis2;
-  ros::Publisher _pubAxis3;
 
   ros::Subscriber _subJoy;
   ros::Subscriber _subDiagonstics;
 
-  ros::ServiceClient _srv_robotic_arm_stand_by;
-  ros::ServiceClient _srv_robotic_arm_active;
+  //todo
+  // ros::ServiceClient _srv_robotic_arm_stand_by;
+  // ros::ServiceClient _srv_robotic_arm_active;
 
   ros::ServiceClient _srv_sw_drive_image;
+  ros::ServiceClient _srv_set_manipulator_axis_mode;
+  ros::ServiceClient _srv_set_manipulator_inverse_mode;
 
   ros::Timer _loopTimer;
   ros::Timer _loopModeTimer;
@@ -283,12 +324,13 @@ private:    //dataelements
   double _max_lin_vel;
   double _max_ang_vel;
 
-  double _max_sh_vel;
+  // double _max_sh_vel;
 
   double _axis_factor;
   double _axis_offset;
 
-  francor_msgs::SensorHeadCmd _sh_default;
+  // francor_msgs::SensorHeadCmd _sh_default;
+  double _sh_tilt_default;
 
   std::unique_ptr<francor::JoyMap> _joy_mapper;
 
@@ -300,12 +342,6 @@ private:    //dataelements
 
   std::string _front_cam_topic;
   std::string _back_cam_topic;
-
-  const std::string DRIVE_ACTION_NONE = "NONE";
-  const std::string DRIVE_ACTION_BOGIE_UP = "BOGIE_UP";
-  const std::string DRIVE_ACTION_BOGIE_UP_DRIVE = "BOGIE_UP_DRIVE";
-  const std::string DRIVE_ACTION_CLIMP = "CLIMP";
-  const std::string DRIVE_ACTION_BOGIE_UP_BOOSTED = "BOGIE_UP_BOOSTED";
 };
 
 #endif /* FRANCORJOY2VEL_H_ */

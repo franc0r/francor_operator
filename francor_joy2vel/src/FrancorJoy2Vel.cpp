@@ -22,14 +22,14 @@ FrancorJoy2Vel::FrancorJoy2Vel()
   double rate;
   double max_lin_vel;
   double max_ang_vel;
-  double max_sh_vel;
+  // double max_sh_vel;
   double dead_zone_sh;
 
   double axis_factor;
   double axis_offset;
 
-  int pan_default;
-  int tilt_default;
+  // int pan_default;
+  double tilt_default;
 
   std::string front_cam_topic;
   std::string back_cam_topic;
@@ -38,13 +38,13 @@ FrancorJoy2Vel::FrancorJoy2Vel()
   privNh.param<double>( "rate" ,           rate,          50.0);
   privNh.param<double>( "max_lin_vel" ,    max_lin_vel,   1.0);
   privNh.param<double>( "max_ang_vel" ,    max_ang_vel,   1.0);
-  privNh.param<double>( "max_sh_vel" ,     max_sh_vel,   30.0);
+  // privNh.param<double>( "max_sh_vel" ,     max_sh_vel,   30.0);
   privNh.param<double>( "dead_zone_sh" ,   dead_zone_sh,  0.3);
   privNh.param<double>( "axis_factor" ,    axis_factor,   1600.0);
   privNh.param<double>( "axis_offset" ,    axis_offset,   700.0);
 
-  privNh.param<int>(    "pan_default"    ,    pan_default   ,   0);
-  privNh.param<int>(    "tilt_default"    ,   tilt_default   ,   20);
+  // privNh.param<int>(    "pan_default"    ,    pan_default   ,   0);
+  privNh.param<double>(    "tilt_default"    ,   tilt_default   ,   0.5);
 
 
 
@@ -54,10 +54,11 @@ FrancorJoy2Vel::FrancorJoy2Vel()
 
   _max_lin_vel = max_lin_vel;
   _max_ang_vel = max_ang_vel;
-  _max_sh_vel  = max_sh_vel;
+  // _max_sh_vel  = max_sh_vel;
 
-  _sh_default.pan  = pan_default;
-  _sh_default.tilt = tilt_default;
+  // _sh_default.pan  = pan_default;
+  // _sh_default.tilt = tilt_default;
+  _sh_tilt_default = tilt_default;
 
   _axis_factor = axis_factor;
   _axis_offset = axis_offset;
@@ -90,41 +91,41 @@ FrancorJoy2Vel::FrancorJoy2Vel()
 
   _joy_mapper->showInitMsg();
 
-  _joy_mapper->attach_callback(francor::btn::TR_L, std::bind(&FrancorJoy2Vel::btn_trigger_left_pressed, this));
-  _joy_mapper->attach_callback(francor::btn::TR_R, std::bind(&FrancorJoy2Vel::btn_trigger_right_pressed, this));
-  _joy_mapper->attach_callback(francor::btn::X,    std::bind(&FrancorJoy2Vel::btn_x_pressed, this));
-  _joy_mapper->attach_callback(francor::btn::Y,    std::bind(&FrancorJoy2Vel::btn_y_pressed, this));
-  _joy_mapper->attach_callback(francor::btn::A,    std::bind(&FrancorJoy2Vel::btn_a_pressed, this));
-  _joy_mapper->attach_callback(francor::btn::B,    std::bind(&FrancorJoy2Vel::btn_b_pressed, this));
-  _joy_mapper->attach_callback(francor::btn::JS_L, std::bind(&FrancorJoy2Vel::btn_joystick_left_pressed, this));
-  _joy_mapper->attach_callback(francor::btn::JS_R, std::bind(&FrancorJoy2Vel::btn_joystick_right_pressed, this));
-  _joy_mapper->attach_callback(francor::btn::UP,   std::bind(&FrancorJoy2Vel::btn_up_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::TR_L,  std::bind(&FrancorJoy2Vel::btn_trigger_left_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::TR_R,  std::bind(&FrancorJoy2Vel::btn_trigger_right_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::X,     std::bind(&FrancorJoy2Vel::btn_x_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::Y,     std::bind(&FrancorJoy2Vel::btn_y_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::A,     std::bind(&FrancorJoy2Vel::btn_a_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::B,     std::bind(&FrancorJoy2Vel::btn_b_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::JS_L,  std::bind(&FrancorJoy2Vel::btn_joystick_left_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::JS_R,  std::bind(&FrancorJoy2Vel::btn_joystick_right_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::UP,    std::bind(&FrancorJoy2Vel::btn_up_pressed, this));
+  _joy_mapper->attach_callback(francor::btn::SHARE, std::bind(&FrancorJoy2Vel::btn_share_pressed, this));
 
   //init publisher
-  _pubMode            = _nh.advertise<std_msgs::String>           ("joy2vel/mode", 1);
-  _pubTwistStamped    = _nh.advertise<geometry_msgs::TwistStamped>("cmd_vel/stamped", 1);
-  _pubTwist           = _nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
-  _pubSpeedSensorHead = _nh.advertise<francor_msgs::SensorHeadCmd>("/sensor_head/set_speed", 1);
-  _pubPosSensorHead   = _nh.advertise<francor_msgs::SensorHeadCmd>("/sensor_head/set_pos", 1);
-  _pubRoboticArm      = _nh.advertise<std_msgs::Float64MultiArray>("robotic_arm/set_joint_speed", 1);
-  _pubDriveAction     = _nh.advertise<std_msgs::String>           ("drive/action", 1);
-  _pubAddVictim       = _nh.advertise<std_msgs::Bool>             ("francor/add_victim", 1);
-
-  _pubAxis0           = _nh.advertise<std_msgs::UInt16>("joy/axis0", 1);
-  _pubAxis1           = _nh.advertise<std_msgs::UInt16>("joy/axis1", 1);
-  _pubAxis2           = _nh.advertise<std_msgs::UInt16>("joy/axis2", 1);
-  _pubAxis3           = _nh.advertise<std_msgs::UInt16>("joy/axis3", 1);
-
+  _pubMode                    = _nh.advertise<std_msgs::String>           ("joy2vel/mode", 1);
+  _pubTwistStamped            = _nh.advertise<geometry_msgs::TwistStamped>("cmd_vel/stamped", 1);
+  _pubTwist                   = _nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+  _pubServoPanSpeed           = _nh.advertise<std_msgs::Float64>("/servo_lx16a/pan/speed",1);
+  _pubServoTiltSpeed          = _nh.advertise<std_msgs::Float64>("/servo_lx16a/tilt/speed",1);
+  _pubServoPanPos             = _nh.advertise<std_msgs::Float64>("/servo_lx16a/pan/pos",1);
+  _pubServoTiltPos            = _nh.advertise<std_msgs::Float64>("/servo_lx16a/tilt/pos",1);
+  _pubManipulatorAxisSpeed    = _nh.advertise<francor_msgs::ManipulatorCmd>("manipulator/speed/axis", 1);
+  _pubManipulaotrInverseSpeed = _nh.advertise<geometry_msgs::Vector3>("manipulator/speed/inverse", 1);
+  _pubAddVictim               = _nh.advertise<std_msgs::Bool>             ("francor/add_victim", 1);
 
 
   //inti subscriber
   _subJoy           = _nh.subscribe("joy", 1, &FrancorJoy2Vel::subJoy_callback, this);
   _subDiagonstics   = _nh.subscribe("/diagnostics", 1, &FrancorJoy2Vel::subDiagnostic_callback, this);
 
-  _srv_robotic_arm_stand_by = _nh.serviceClient<std_srvs::Empty>("/robotic_arm/set_stand_by");
-  _srv_robotic_arm_active   = _nh.serviceClient<std_srvs::Empty>("/robotic_arm/set_active");
+  // _srv_robotic_arm_stand_by = _nh.serviceClient<std_srvs::Empty>("/robotic_arm/set_stand_by");
+  // _srv_robotic_arm_active   = _nh.serviceClient<std_srvs::Empty>("/robotic_arm/set_active");
 
-  _srv_sw_drive_image       = _nh.serviceClient<topic_tools::MuxSelect>("/mux/select");
+  _srv_sw_drive_image               = _nh.serviceClient<topic_tools::MuxSelect>("/mux/select");
+  _srv_set_manipulator_axis_mode    = _nh.serviceClient<std_srvs::Empty>("manipulator/set_mode/axis");
+  _srv_set_manipulator_inverse_mode = _nh.serviceClient<std_srvs::Empty>("manipulator/set_mode/inverse");
+
 
   _reverse_drive = false;
 
@@ -206,42 +207,21 @@ void FrancorJoy2Vel::loop_callback(const ros::TimerEvent& e)
     return;
   }
 
-  //drive action
-  // if(_mode == DRIVE)
-  // {
-  //   if(_joy_mapper->getJoyInput().btns[francor::btn::A])
-  //   {
-  //     _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_CLIMP));
-  //   }
-  //   else if(_joy_mapper->getJoyInput().btns[francor::btn::X])
-  //   {
-  //     _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_BOGIE_UP_BOOSTED));
-  //   }
-  //   else if(_joy_mapper->getJoyInput().btns[francor::btn::Y])
-  //   {
-  //     //prove if moving
-  //     if(_joy_mapper->getJoyInput().vel_ang == 0.0 && _joy_mapper->getJoyInput().vel_lin_x == 0.0) 
-  //     {//no movement
-  //       _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_BOGIE_UP));
-  //     }
-  //     else
-  //     {//movement
-  //       _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_BOGIE_UP_DRIVE));
-  //     }
-  //   }
-  //   else
-  //   {
-  //     _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_NONE));
-  //   }
-    
-  // }
-
   //for buttons
   _joy_mapper->triggerBtn_callbacks();  
 
   if(_mode == DRIVE)
   {
-    _pubSpeedSensorHead.publish(_joy_mapper->toSensorHeadCmd(_max_sh_vel, _reverse_drive));
+    //old sh
+    // _pubSpeedSensorHead.publish(_joy_mapper->toSensorHeadCmd(_max_sh_vel, _reverse_drive));
+    //new sh
+    std_msgs::Float64 msg;
+    auto speed = _joy_mapper->toSensorHeadSpeed(_reverse_drive);
+    msg.data = speed.first;
+    _pubServoPanSpeed.publish(msg);
+    msg.data = speed.second;
+    _pubServoTiltSpeed.publish(msg);
+
     if(_twist_enabled)
     {
       _pubTwistStamped.publish(_joy_mapper->toTwistStamped(_max_lin_vel, _max_ang_vel, _reverse_drive));
@@ -250,35 +230,22 @@ void FrancorJoy2Vel::loop_callback(const ros::TimerEvent& e)
   }
   else if(_mode == MANIPULATE_DIRECT)
   {
-    _pubRoboticArm.publish(_joy_mapper->toRoboicArmCmd());
+    _pubManipulatorAxisSpeed.publish(_joy_mapper->toManipulatorCmd(false));
+
+    //todo may dont do this -> add extra mode for drivin while manipulating
     _pubTwistStamped.publish(this->getEmptyTwist());
     _pubTwist.publish(this->getEmptyTwist().twist);
   }
   else if(_mode == MANIPULATE_INVERSE)
   {
+    _pubManipulatorAxisSpeed.publish(_joy_mapper->toManipulatorCmd(true));
+    _pubManipulaotrInverseSpeed.publish(_joy_mapper->toManipulatorCmd_inverse());
 
+    //todo may dont do this -> add extra mode for drivin while manipulating
     _pubTwistStamped.publish(this->getEmptyTwist());
     _pubTwist.publish(this->getEmptyTwist().twist);
   }
 
-  //pub axis
-  double axis0 = (_joy_mapper->getJoyInput().vel_lin_x + 1.0) * 0.5 * _axis_factor + _axis_offset;
-  // std::cout << "axis0: " << axis0 << std::endl;
-  double axis1 = (_joy_mapper->getJoyInput().vel_ang + 1.0) * 0.5 * _axis_factor + _axis_offset;
-  // std::cout << "axis1: " << axis1 << std::endl;
-  double axis2 = (_joy_mapper->getJoyInput().vel_sh_pan + 1.0) * 0.5 * _axis_factor + _axis_offset;
-  // std::cout << "axis2: " << axis2 << std::endl;
-  double axis3 = (_joy_mapper->getJoyInput().vel_ang_up + 1.0) * 0.5 * _axis_factor + _axis_offset;
-  // std::cout << "axis3: " << axis3 << std::endl;
-  std_msgs::UInt16 axis;
-  axis.data = static_cast<uint16_t>(std::round(axis0));
-  _pubAxis0.publish(axis);
-  axis.data = static_cast<uint16_t>(std::round(axis1));
-  _pubAxis1.publish(axis);
-  axis.data = static_cast<uint16_t>(std::round(axis2));
-  _pubAxis2.publish(axis);
-  axis.data = static_cast<uint16_t>(std::round(axis3));
-  _pubAxis3.publish(axis);
 }
 
 void FrancorJoy2Vel::loop_mode_callback(const ros::TimerEvent& e)

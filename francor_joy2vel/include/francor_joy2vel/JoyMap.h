@@ -16,9 +16,12 @@
 #include <sensor_msgs/Joy.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/TwistStamped.h>
-#include <std_msgs/Float64MultiArray.h>
+#include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/Point.h> //todo prove if needed
+// #include <std_msgs/Float64MultiArray.h>
 
-#include <francor_msgs/SensorHeadCmd.h>
+// #include <francor_msgs/SensorHeadCmd.h>
+#include <francor_msgs/ManipulatorCmd.h>
 
 namespace francor{
 
@@ -36,6 +39,7 @@ enum enum_JoyMapBtn{
   RIGHT,
   TR_L,
   TR_R,
+  SHARE,
   NUM_BTN
 };
 } //namespace btn
@@ -97,19 +101,19 @@ public:
     return twist;
   }
 
-  inline francor_msgs::SensorHeadCmd toSensorHeadCmd(const double scale = 1.0, const bool reverse = false)
-  {
-    francor_msgs::SensorHeadCmd cmd;
+  // inline francor_msgs::SensorHeadCmd toSensorHeadCmd(const double scale = 1.0, const bool reverse = false)
+  // {
+  //   francor_msgs::SensorHeadCmd cmd;
     
-    // int16_t cmd_pan  = 500 + 1000 + std::round(1000.0 * _input.vel_sh_pan);
-    // int16_t cmd_tilt = 500 + 1000 + std::round(1000.0 * _input.vel_sh_tilt);
-    int16_t cmd_pan  = std::round(scale * _input.vel_sh_pan);
-    int16_t cmd_tilt = std::round(scale * _input.vel_sh_tilt * (reverse ? -1.0 : 1.0));
+  //   // int16_t cmd_pan  = 500 + 1000 + std::round(1000.0 * _input.vel_sh_pan);
+  //   // int16_t cmd_tilt = 500 + 1000 + std::round(1000.0 * _input.vel_sh_tilt);
+  //   int16_t cmd_pan  = std::round(scale * _input.vel_sh_pan);
+  //   int16_t cmd_tilt = std::round(scale * _input.vel_sh_tilt * (reverse ? -1.0 : 1.0));
 
-    cmd.pan  = cmd_pan;
-    cmd.tilt = cmd_tilt;
-    return cmd;
-  }
+  //   cmd.pan  = cmd_pan;
+  //   cmd.tilt = cmd_tilt;
+  //   return cmd;
+  // }
 
   /**
    * @brief converts joy to sensorhead speed 
@@ -125,16 +129,60 @@ public:
     return speed;
   }
 
-  inline std_msgs::Float64MultiArray toRoboicArmCmd()
+  // inline std_msgs::Float64MultiArray toRoboicArmCmd()
+  // {
+  //   std_msgs::Float64MultiArray cmd;
+  //   cmd.data.resize(6);
+  //   cmd.data[0] = _input.vel_ang;
+  //   cmd.data[1] = _input.vel_ang_up;
+  //   cmd.data[2] = _input.vel_sh_tilt;
+  //   cmd.data[3] = _input.vel_sh_pan;
+  //   cmd.data[4] = _input.vel_lin_x;
+  //   cmd.data[5] = _input.vel_res;
+
+  //   return cmd;
+  // }
+
+  inline francor_msgs::ManipulatorCmd toManipulatorCmd(const bool head_only = false)
   {
-    std_msgs::Float64MultiArray cmd;
-    cmd.data.resize(6);
-    cmd.data[0] = _input.vel_ang;
-    cmd.data[1] = _input.vel_ang_up;
-    cmd.data[2] = _input.vel_sh_tilt;
-    cmd.data[3] = _input.vel_sh_pan;
-    cmd.data[4] = _input.vel_lin_x;
-    cmd.data[5] = _input.vel_res;
+    //movement
+    /* head pan tilt like SensorHeadCmd
+     * head roll: x and b button
+     * head gripper: close y open y&a
+     * 
+     * axis 1: ang_up
+     * axis 2: ang
+     */
+    francor_msgs::ManipulatorCmd cmd;
+
+    if(head_only)
+    {
+      cmd.joint_0 = 0.0;
+      cmd.joint_1 = 0.0;
+      cmd.joint_2 = 0.0;
+      cmd.joint_3 = 0.0;
+    }
+    else
+    {
+      cmd.joint_0      = 0.0;
+      cmd.joint_1      = _input.vel_ang_up;
+      cmd.joint_2      = _input.vel_ang;
+      cmd.joint_3      = 0.0;
+    }
+    cmd.head_pan     = _input.vel_sh_pan;
+    cmd.head_tilt    = _input.vel_sh_tilt;
+    cmd.head_roll    = (_input.btns[btn::X] ? 0.3 : 0.0)  + (_input.btns[btn::B] ? -0.3 : 0.0);
+    cmd.head_gripper = ((_input.btns[btn::Y]) && !_input.btns[btn::A] ? 0.3 : 0.0) + ((_input.btns[btn::Y] && _input.btns[btn::A]) ? -0.3 : 0.0);
+    return cmd;
+  }
+
+  inline geometry_msgs::Vector3 toManipulatorCmd_inverse()
+  {
+    geometry_msgs::Vector3 cmd;
+
+    cmd.x = _input.vel_lin_x;  
+    cmd.y = 0.0;  //currently not used
+    cmd.z = _input.vel_ang_up;
 
     return cmd;
   }
