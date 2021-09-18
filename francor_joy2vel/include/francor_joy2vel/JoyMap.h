@@ -164,14 +164,14 @@ public:
     }
     else
     {
-      cmd.joint_0      = 0.0;
+      cmd.joint_0      = _input.vel_ang;
       cmd.joint_1      = _input.vel_ang_up;
-      cmd.joint_2      = _input.vel_ang;
+      cmd.joint_2      = _input.vel_lin_x;
       cmd.joint_3      = 0.0;
     }
-    cmd.head_pan     = _input.vel_sh_pan;
-    cmd.head_tilt    = _input.vel_sh_tilt;
-    cmd.head_roll    = (_input.btns[btn::X] ? 0.3 : 0.0)  + (_input.btns[btn::B] ? -0.3 : 0.0);
+    cmd.head_pan     = _input.vel_sh_pan * -1;
+    cmd.head_tilt    = _input.vel_sh_tilt * -1;
+    cmd.head_roll    = (_input.btns[btn::X] ? -0.2 : 0.0)  + (_input.btns[btn::B] ? 0.2 : 0.0);
     cmd.head_gripper = ((_input.btns[btn::Y]) && !_input.btns[btn::A] ? 0.3 : 0.0) + ((_input.btns[btn::Y] && _input.btns[btn::A]) ? -0.3 : 0.0);
     return cmd;
   }

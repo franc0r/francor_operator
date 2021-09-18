@@ -160,7 +160,7 @@ void FrancorJoy2Vel::subDiagnostic_callback(const diagnostic_msgs::DiagnosticArr
 {
   for(const auto& e : msg.status)
   {
-    //ignore all others
+    //ignore all others //todo fix node name ...
     if(e.name == "joy_node: Joystick Driver Status")
     {
       // std::cout << "got diagonstic info" << std::endl;

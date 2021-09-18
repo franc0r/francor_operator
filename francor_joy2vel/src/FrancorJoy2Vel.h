@@ -244,33 +244,36 @@ private:    //functions
   void btn_up_pressed()
   {
     ROS_INFO("Button UP");
-    //toggle reverse
-    _reverse_drive = !_reverse_drive;
-    //swich sensorhead to default
-    // _pubPosSensorHead.publish(this->getDefaultSensorHead());
-    std_msgs::Float64 msg;
-    msg.data = 0.0;
-    _pubServoPanPos.publish(msg);
-    _pubServoTiltPos.publish(this->getDefaultTiltSensorHead());
-
-    if(_reverse_drive)
+    if(_mode == DRIVE)
     {
-      //swich driver cam topic
-      topic_tools::MuxSelect srv;
-      srv.request.topic = _back_cam_topic;
-      if(!_srv_sw_drive_image.call(srv))
+      //toggle reverse
+      _reverse_drive = !_reverse_drive;
+      //swich sensorhead to default
+      // _pubPosSensorHead.publish(this->getDefaultSensorHead());
+      std_msgs::Float64 msg;
+      msg.data = 0.0;
+      _pubServoPanPos.publish(msg);
+      _pubServoTiltPos.publish(this->getDefaultTiltSensorHead());
+  
+      if(_reverse_drive)
       {
-        ROS_WARN("Unable to call swich topic srv");
+        //swich driver cam topic
+        topic_tools::MuxSelect srv;
+        srv.request.topic = _back_cam_topic;
+        if(!_srv_sw_drive_image.call(srv))
+        {
+          ROS_WARN("Unable to call swich topic srv");
+        }
       }
-    }
-    else
-    {
-      //swich driver cam topic
-      topic_tools::MuxSelect srv;
-      srv.request.topic = _front_cam_topic;
-      if(!_srv_sw_drive_image.call(srv))
+      else
       {
-        ROS_WARN("Unable to call swich topic srv");
+        //swich driver cam topic
+        topic_tools::MuxSelect srv;
+        srv.request.topic = _front_cam_topic;
+        if(!_srv_sw_drive_image.call(srv))
+        {
+          ROS_WARN("Unable to call swich topic srv");
+        }
       }
     }
   }
