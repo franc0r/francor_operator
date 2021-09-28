@@ -16,8 +16,19 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
-include(${QT_USE_FILE})
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+if(CMAKE_VERSION VERSION_LESS "3.7.0")
+    set(CMAKE_INCLUDE_CURRENT_DIR ON)
+endif()
+
+find_package(Qt5 COMPONENTS Core Gui REQUIRED)
+# include(${QT_USE_FILE})
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -132,14 +143,14 @@ include_directories(
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-qt4_wrap_cpp(rqt_rviz_MOCS src/my_plugin.h)
+# qt4_wrap_cpp(rqt_rviz_MOCS src/my_plugin.h)
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(my_plugin
   src/my_plugin.cpp
-  ${rqt_rviz_MOCS}
+  # ${rqt_rviz_MOCS}
 )
 
 ## Rename C++ executable without prefix
@@ -155,8 +166,10 @@ add_dependencies(my_plugin ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED
 ## Specify libraries to link a library or executable target against
 target_link_libraries(my_plugin
   ${catkin_LIBRARIES}
-  ${QT_QTCORE_LIBRARY}
-  ${QT_QTGUI_LIBRARY}
+  # ${QT_QTCORE_LIBRARY}
+  # ${QT_QTGUI_LIBRARY}
+  Qt::Core
+  Qt::Gui
 )
 
 #############
