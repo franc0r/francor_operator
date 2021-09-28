@@ -10,8 +10,8 @@
   <node name="francor_joy2vel_node" pkg="francor_joy2vel" type="francor_joy2vel_node" output="screen">
     <param name="joy_map"          type="string" value="ps4"   />
     <param name="rate"             type="double" value="50.0"   />
-    <param name="max_lin_vel"      type="double" value="1.0 "   />
-    <param name="max_ang_vel"      type="double" value="1.0"   />
+    <param name="max_lin_vel"      type="double" value="0.75 "   />
+    <param name="max_ang_vel"      type="double" value="0.75"   />
     <!-- <param name="max_sh_vel"       type="double" value="35.0 "   /> -->
     <param name="dead_zone_sh"     type="double" value="0.2"   />
     <!-- <param name="pan_default"      type="int" value="0 "   /> -->

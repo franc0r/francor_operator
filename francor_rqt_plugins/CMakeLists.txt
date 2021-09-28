@@ -27,7 +27,7 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
-find_package(Qt5 COMPONENTS Core Gui REQUIRED)
+find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 # include(${QT_USE_FILE})
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -137,7 +137,8 @@ include_directories(
 # add_library(${PROJECT_NAME}
 #  src/my_plugin.cpp
 #)
-
+add_definitions(-fPIC)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
@@ -163,13 +164,18 @@ add_executable(my_plugin
 ## same as for the library above
 add_dependencies(my_plugin ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+target_include_directories(my_plugin
+  PUBLIC ${Qt5Widgets_INCLUDE_DIRS}
+)
+
 ## Specify libraries to link a library or executable target against
 target_link_libraries(my_plugin
   ${catkin_LIBRARIES}
   # ${QT_QTCORE_LIBRARY}
   # ${QT_QTGUI_LIBRARY}
-  Qt::Core
-  Qt::Gui
+  Qt5::Core
+  Qt5::Gui
+  Qt5::Widgets
 )
 
 #############
