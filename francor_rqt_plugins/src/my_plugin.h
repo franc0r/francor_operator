@@ -10,6 +10,7 @@
 
 #include <std_msgs/Int32.h>
 #include <std_msgs/String.h>
+#include <std_srvs/Empty.h>
 #endif
 
 class QProgressBar;
@@ -55,6 +56,9 @@ private:
   ros::Subscriber _sub_info_a;
   ros::Subscriber _sub_info_b;
   ros::Subscriber _sub_info_c;
+
+  ros::ServiceClient _srv_save_map;
+
 #endif
 };
 

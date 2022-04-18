@@ -106,10 +106,10 @@ FrancorJoy2Vel::FrancorJoy2Vel()
   _pubMode                    = _nh.advertise<std_msgs::String>           ("joy2vel/mode", 1);
   _pubTwistStamped            = _nh.advertise<geometry_msgs::TwistStamped>("cmd_vel/stamped", 1);
   _pubTwist                   = _nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
-  _pubServoPanSpeed           = _nh.advertise<std_msgs::Float64>("/servo_lx16a/pan/speed",1);
-  _pubServoTiltSpeed          = _nh.advertise<std_msgs::Float64>("/servo_lx16a/tilt/speed",1);
-  _pubServoPanPos             = _nh.advertise<std_msgs::Float64>("/servo_lx16a/pan/pos",1);
-  _pubServoTiltPos            = _nh.advertise<std_msgs::Float64>("/servo_lx16a/tilt/pos",1);
+  _pubServoPanSpeed           = _nh.advertise<std_msgs::Float64>("/servo_lx16a/sensor_head_yaw/speed",1);
+  _pubServoTiltSpeed          = _nh.advertise<std_msgs::Float64>("/servo_lx16a/sensor_head_pitch/speed",1);
+  _pubServoPanPos             = _nh.advertise<std_msgs::Float64>("/servo_lx16a/sensor_head_yaw/pos",1);
+  _pubServoTiltPos            = _nh.advertise<std_msgs::Float64>("/servo_lx16a/sensor_head_pitch/pos",1);
   _pubManipulatorAxisSpeed    = _nh.advertise<francor_msgs::ManipulatorCmd>("manipulator/speed/axis", 1);
   _pubManipulaotrInverseSpeed = _nh.advertise<geometry_msgs::Vector3>("manipulator/speed/inverse", 1);
   _pubAddVictim               = _nh.advertise<std_msgs::Bool>             ("francor/add_victim", 1);

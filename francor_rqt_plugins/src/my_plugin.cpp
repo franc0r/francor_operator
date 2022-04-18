@@ -43,8 +43,8 @@ MyPlugin::MyPlugin()
   auto textBarFast = new QLabel("CO2 Sensor (fast)");
   layout->addWidget(textBarFast);
   _co2bar_fast = new QProgressBar;
-  _co2bar_fast->setMaximum(20);
-  _co2bar_fast->setMinimum(0);
+  _co2bar_fast->setMaximum(50);
+  _co2bar_fast->setMinimum(15);
   // _co2bar_fast->setFormat("%v ppm");
   layout->addWidget(_co2bar_fast);
 
@@ -65,6 +65,8 @@ MyPlugin::MyPlugin()
   _sub_info_a = _nh.subscribe("info_text_a", 2, &MyPlugin::callbackInfoTextA, this);
   _sub_info_b = _nh.subscribe("info_text_b", 2, &MyPlugin::callbackInfoTextB, this);
   _sub_info_c = _nh.subscribe("info_text_c", 2, &MyPlugin::callbackInfoTextC, this);
+
+  _srv_save_map = _nh.serviceClient<std_srvs::Empty>("save_geotiff");
 #endif
 
   // info texts
@@ -104,9 +106,18 @@ void MyPlugin::stop(void)
 
 void MyPlugin::stopSlam(void)
 {
+
+  std_srvs::Empty srv;
+  if(!_srv_save_map.call(srv))
+  {
+    ROS_ERROR("Unable to call _srv_set_manipulator_axis_mode ...");
+  }
+
   ROS_INFO("Stop SLAM by killing it.");
   QProcess::execute("rosnode", QStringList() << "kill" << "/slam_node");
   QProcess::execute("rosnode", QStringList() << "kill" << "/francor_victim_node");
+
+
 }
 
 void MyPlugin::process(void)
