@@ -23,10 +23,11 @@ public:
 
   virtual void showInitMsg() const
   {
-    ROS_INFO("Initialize Joystick by pressing Max Forward and Max Backward simultaneously...");
+    // ROS_INFO("Initialize Joystick by pressing Max Forward and Max Backward simultaneously...");
+    std::cout << "Initialize Joystick by pressing Max Forward and Max Backward simultaneously..." << std::endl;
   }
 protected:
-  virtual JoyInput map_input(const sensor_msgs::Joy& joy_msg)
+  virtual JoyInput map_input(const sensor_msgs::msg::Joy& joy_msg)
   {
 
     JoyInput input;

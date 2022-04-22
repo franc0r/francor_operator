@@ -12,16 +12,17 @@
 
 #include <functional>
 
-#include <ros/ros.h>
-#include <sensor_msgs/Joy.h>
-#include <geometry_msgs/Twist.h>
-#include <geometry_msgs/TwistStamped.h>
-#include <geometry_msgs/Vector3.h>
-#include <geometry_msgs/Point.h> //todo prove if needed
+// #include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/joy.hpp>
+#include <geometry_msgs/msg/twist.hpp>
+#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <geometry_msgs/msg/vector3.hpp>
+#include <geometry_msgs/msg/point.hpp> //todo prove if needed
 // #include <std_msgs/Float64MultiArray.h>
 
 // #include <francor_msgs/SensorHeadCmd.h>
-#include <francor_msgs/ManipulatorCmd.h>
+#include "francor_msgs/msg/manipulator_cmd.hpp"
 
 namespace francor{
 
@@ -83,18 +84,18 @@ public:
   virtual ~JoyMap()
   { }
 
-  inline geometry_msgs::TwistStamped toTwistStamped(const double lin_scale = 1.0, const double ang_scale = 1.0, const bool reverse = false) const
+  inline geometry_msgs::msg::TwistStamped toTwistStamped(const double lin_scale = 1.0, const double ang_scale = 1.0, const bool reverse = false) const
   {
-    geometry_msgs::TwistStamped twist;
-    twist.header.stamp = ros::Time::now();
+    geometry_msgs::msg::TwistStamped twist;
+    // twist.header.stamp = ros::Time::now(); //todo
     twist.twist.angular.z = _input.vel_ang * ang_scale;
     twist.twist.linear.x  = _input.vel_lin_x * lin_scale * (reverse ? -1.0 : 1.0);
     twist.twist.linear.y  = _input.vel_lin_y * lin_scale;
     return twist;
   }
-  inline geometry_msgs::Twist toTwist(const double lin_scale = 1.0, const double ang_scale = 1.0, const bool reverse = false) const
+  inline geometry_msgs::msg::Twist toTwist(const double lin_scale = 1.0, const double ang_scale = 1.0, const bool reverse = false) const
   {
-    geometry_msgs::Twist twist;
+    geometry_msgs::msg::Twist twist;
     twist.angular.z = _input.vel_ang * ang_scale;
     twist.linear.x  = _input.vel_lin_x * lin_scale * (reverse ? -1.0 : 1.0);
     twist.linear.y  = _input.vel_lin_y * lin_scale;
@@ -143,7 +144,7 @@ public:
   //   return cmd;
   // }
 
-  inline francor_msgs::ManipulatorCmd toManipulatorCmd(const bool head_only = false)
+  inline francor_msgs::msg::ManipulatorCmd toManipulatorCmd(const bool head_only = false)
   {
     //movement
     /* head pan tilt like SensorHeadCmd
@@ -153,7 +154,7 @@ public:
      * axis 1: ang_up
      * axis 2: ang
      */
-    francor_msgs::ManipulatorCmd cmd;
+    francor_msgs::msg::ManipulatorCmd cmd;
 
     if(head_only)
     {
@@ -176,9 +177,9 @@ public:
     return cmd;
   }
 
-  inline geometry_msgs::Vector3 toManipulatorCmd_inverse()
+  inline geometry_msgs::msg::Vector3 toManipulatorCmd_inverse()
   {
-    geometry_msgs::Vector3 cmd;
+    geometry_msgs::msg::Vector3 cmd;
 
     cmd.x = _input.vel_lin_x;  
     cmd.y = 0.0;  //currently not used
@@ -187,7 +188,7 @@ public:
     return cmd;
   }
 
-  void map(const sensor_msgs::Joy& joy_msg)
+  void map(const sensor_msgs::msg::Joy& joy_msg)
   {
     _input = this->map_input(joy_msg);
   }
@@ -208,7 +209,8 @@ public:
       _callbacks.at(btn) = fcn;
     } catch(std::out_of_range& e)
     {
-      ROS_ERROR_STREAM("Unable to attach callback wront btn -> out of range. what?:"  << e.what());
+      // ROS_ERROR_STREAM("Unable to attach callback wront btn -> out of range. what?:"  << e.what());
+      std::cout << "Unable to attach callback wront btn -> out of range. what?:"  << e.what() << std::endl;
       return;
     }
   }
@@ -233,7 +235,7 @@ public:
   //todo fcn to vel sensorhead..
   virtual void showInitMsg() const = 0;
 protected:
-  virtual JoyInput map_input(const sensor_msgs::Joy& joy_msg) = 0;
+  virtual JoyInput map_input(const sensor_msgs::msg::Joy& joy_msg) = 0;
   double _dead_zone_sh;
 
 private:
