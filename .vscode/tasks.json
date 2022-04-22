@@ -1,0 +1,28 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+    {
+      "type": "shell",
+      "command": "colcon build --packages-up-to ${input:pkgs} --symlink-install --cmake-args \"-DCMAKE_EXPORT_COMPILE_COMMANDS=1\" ",
+      "options": {
+        "cwd": "${workspaceFolder}/../../"
+      },
+      "problemMatcher": [
+        "$gcc",
+      ],
+      "group": "build",
+      "label": "colcon_build"
+    },
+  ],
+  "inputs": [
+    {
+      "id": "pkgs",
+      "type": "pickString",
+      "description": "pkgs from this meta pkg",
+      "options": [
+        "francor_joy2vel",
+        "francor_operator",
+      ]
+    }
+  ]
+}
