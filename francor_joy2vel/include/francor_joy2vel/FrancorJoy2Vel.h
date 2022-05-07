@@ -11,17 +11,7 @@
 #ifndef FRANCORJOY2VEL_H_
 #define FRANCORJOY2VEL_H_
 
-#include <francor_msgs/msg/detail/manipulator_cmd__struct.hpp>
-#include <geometry_msgs/msg/detail/vector3__struct.hpp>
 #include <iostream>
-#include <rclcpp/client.hpp>
-#include <rclcpp/executors.hpp>
-#include <rclcpp/future_return_code.hpp>
-#include <rclcpp/logging.hpp>
-#include <rclcpp/publisher.hpp>
-#include <std_msgs/msg/detail/string__struct.hpp>
-#include <std_srvs/srv/detail/empty__struct.hpp>
-#include <stdexcept>
 #include <string>
 #include <memory>
 #include <functional>
@@ -32,6 +22,7 @@
 #include <std_msgs/msg/u_int16.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <std_srvs/srv/empty.hpp>
+#include <std_srvs/srv/set_bool.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <sensor_msgs/msg/joy.hpp>
 #include <geometry_msgs/msg/vector3.hpp>
@@ -50,6 +41,8 @@
 
 
 #include "francor_msgs/msg/manipulator_cmd.hpp"
+
+
 
 class FrancorJoy2Vel : public rclcpp::Node
 {
@@ -91,46 +84,83 @@ private:    //functions
   void subJoy_callback(const sensor_msgs::msg::Joy::SharedPtr msg);
   void subDiagnostic_callback(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr msg); //for detecting joystic timeout...
 
-  bool executeEmptyService(rclcpp::Client<std_srvs::srv::Empty>::SharedPtr client)
-  {
-    //todo hacky spin_until_future_complete is bad here .... try furture_wait or something else maybe lambda  as callback and wait for it to finish
 
-    try {
-      auto request = std::make_shared<std_srvs::srv::Empty::Request>();
-      auto result_future =  client->async_send_request(request);
-      if(rclcpp::spin_until_future_complete(this->get_node_base_interface(), result_future) == rclcpp::FutureReturnCode::SUCCESS)
-      {
-        // RCLCPP_INFO(this->get_logger(), "Service executed successfully");
-        return true;
-      }
-      else
-      {
-        RCLCPP_ERROR(this->get_logger(), "Service execution failed");
-        return false;
-      }
-    } catch (std::runtime_error &e) {
-      RCLCPP_ERROR(this->get_logger(), "Service call failed: %s", e.what());
+  bool executeEmptySrv(rclcpp::Client<std_srvs::srv::Empty>::SharedPtr client)
+  {
+    using namespace std::chrono_literals;
+    if(!client->wait_for_service(100ms))
+    {
+      // RCLCPP_ERROR(this->get_logger(), "Service not available, aborting");
       return false;
     }
+
+    //fucking hack!!!!
+    auto req = std::make_shared<std_srvs::srv::Empty::Request>();
+
+    using srv_res_future = rclcpp::Client<std_srvs::srv::Empty>::SharedFutureWithRequest;
+    auto response_received_callback =
+      [logger = this->get_logger()](srv_res_future future) {
+        (void)future; //unused
+        // auto request_response_pair = future.get();
+        RCLCPP_INFO(logger, "Result of srv good!");
+      };
+
+    auto result = client->async_send_request(req, std::move(response_received_callback));
+    return true;
   }
 
-  bool executeMuxSelectService(rclcpp::Client<topic_tools_interfaces::srv::MuxSelect>::SharedPtr client, std::string topic)
+  bool executeSetBoolSrv(rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr client, bool value)
   {
-    auto request = std::make_shared<topic_tools_interfaces::srv::MuxSelect::Request>();
-    request->topic = topic;
-    auto result_future =  client->async_send_request(request);
-    if(rclcpp::spin_until_future_complete(this->get_node_base_interface(), result_future) == rclcpp::FutureReturnCode::SUCCESS)
+    using namespace std::chrono_literals;
+    if(!client->wait_for_service(100ms))
     {
-      // RCLCPP_INFO(this->get_logger(), "Service executed successfully");
-      return true;
-    }
-    else
-    {
-      RCLCPP_ERROR(this->get_logger(), "Service execution failed");
+      // RCLCPP_ERROR(this->get_logger(), "Service not available, aborting");
       return false;
     }
+
+    //fucking hack!!!!
+    auto req = std::make_shared<std_srvs::srv::SetBool::Request>();
+    req->data = value;
+
+    using srv_res_future = rclcpp::Client<std_srvs::srv::SetBool>::SharedFutureWithRequest;
+    auto response_received_callback =
+      [logger = this->get_logger()](srv_res_future future) {
+        // (void)future; //unused
+        auto request_response_pair = future.get();
+
+        RCLCPP_INFO(logger, "Result of srv good! -> request: %s, res -> succ: %s str: %s", 
+          (request_response_pair.first->data ? "true" : "false"), 
+          (request_response_pair.second->success ? "true" : "false"), 
+          request_response_pair.second->message.c_str());
+      };
+
+    auto result = client->async_send_request(req, std::move(response_received_callback));
+    return true;
   }
 
+  bool executeMuxSelectSrv(rclcpp::Client<topic_tools_interfaces::srv::MuxSelect>::SharedPtr client, std::string topic)
+  {
+    using namespace std::chrono_literals;
+    if(!client->wait_for_service(100ms))
+    {
+      // RCLCPP_ERROR(this->get_logger(), "Service not available, aborting");
+      return false;
+    }
+    //fucking hack!!!!
+    auto req = std::make_shared<topic_tools_interfaces::srv::MuxSelect::Request>();
+    req->topic = topic;
+
+    using srv_res_future = rclcpp::Client<topic_tools_interfaces::srv::MuxSelect>::SharedFutureWithRequest;
+    auto response_received_callback =
+      [logger = this->get_logger()](srv_res_future future) {
+        auto request_response_pair = future.get();
+        // request_response_pair.second->prev_topic
+        RCLCPP_INFO(logger, "Result of srv good! -> switched from  %s  to %s", request_response_pair.second->prev_topic.c_str(), request_response_pair.first->topic.c_str() );
+      };
+
+    auto result = client->async_send_request(req, std::move(response_received_callback));
+    return true;
+  }
   geometry_msgs::msg::TwistStamped getEmptyTwist() const
   {
     geometry_msgs::msg::TwistStamped empty;
@@ -165,7 +195,6 @@ private:    //functions
 
   void btn_trigger_left_pressed()
   {
-    // ROS_INFO("Trigger left");
     RCLCPP_INFO(this->get_logger(), "Trigger left");
     if(_mode == DRIVE)
     {
@@ -219,20 +248,17 @@ private:    //functions
   }
   void btn_x_pressed()
   {
-    // ROS_INFO("Button x");
     RCLCPP_INFO(this->get_logger(), "Button x");
     if(_mode == DRIVE)
     {
       //disable / enable Twist;
       if(_twist_enabled)
       {
-        // ROS_INFO("Disable Twist");
         RCLCPP_INFO(this->get_logger(), "Disable Twist");
         _twist_enabled = false;
       }
       else
       {
-        // ROS_INFO("Enable Twist");
         RCLCPP_INFO(this->get_logger(), "Enable Twist");
         _twist_enabled = true;
       }
@@ -240,64 +266,51 @@ private:    //functions
   }
   void btn_y_pressed()
   {
-    // ROS_INFO("Button y");
     RCLCPP_INFO(this->get_logger(), "Button y");
   }
 
   void btn_a_pressed()
   {
-    // ROS_INFO("Button a");
     RCLCPP_INFO(this->get_logger(), "Button a");
   }
 
   void btn_b_pressed()
   {
-    // ROS_INFO("Button b");
     RCLCPP_INFO(this->get_logger(), "Button b");
   }
 
   void btn_joystick_left_pressed()
   {
-    // ROS_INFO("Button JSL");
     RCLCPP_INFO(this->get_logger(), "Button JSL");
     //change mode
     if(_mode == DRIVE)
     {
-      // ROS_INFO("Set Mode: MANIPULATE_DIRECT");
       RCLCPP_INFO(this->get_logger(), "Set Mode: MANIPULATE_DIRECT");
       //call service for axis mode
-      // std_srvs::Empty srv;
-      // 
-      if(!this->executeEmptyService(_srv_set_manipulator_axis_mode))//_srv_set_manipulator_axis_mode.call(srv))
+      if(!this->executeEmptySrv(_srv_manipulator_axis_mode))
       {
-        // ROS_ERROR("Unable to call _srv_set_manipulator_axis_mode ...");
         RCLCPP_ERROR(this->get_logger(), "Unable to call _srv_set_manipulator_axis_mode ...");
       }
       _mode = MANIPULATE_DIRECT;
     }
     else if(_mode == MANIPULATE_DIRECT)
     {
-      // ROS_INFO("Set Mode: MANIPULATE_INVERSE");
       RCLCPP_INFO(this->get_logger(), "Set Mode: MANIPULATE_INVERSE");
       //call service for inverse mode
-      // std_srvs::Empty srv;
-      if(!this->executeEmptyService(_srv_set_manipulator_inverse_mode))//!_srv_set_manipulator_inverse_mode.call(srv))
+      if(!this->executeEmptySrv(_srv_manipulator_inverse_mode))  
       {
-        // ROS_ERROR("Unable to call _srv_set_manipulator_inverse_mode ...");
         RCLCPP_ERROR(this->get_logger(), "Unable to call _srv_set_manipulator_inverse_mode ...");
       }
       _mode = MANIPULATE_INVERSE;
     }
     else if(_mode == MANIPULATE_INVERSE)
     {
-      // ROS_INFO("Set Mode: DRIVE");
       RCLCPP_INFO(this->get_logger(), "Set Mode: DRIVE");
       _mode = DRIVE;
     }
     else
     {
       //INVALID MODE -> go to DRIVE mode
-      // ROS_INFO("Invalid Mode -> Set Mode: DRIVE");
       RCLCPP_INFO(this->get_logger(), "Invalid Mode -> Set Mode: DRIVE");
       _mode = DRIVE;
     }
@@ -305,21 +318,18 @@ private:    //functions
 
   void btn_joystick_right_pressed()
   {
-    // ROS_INFO("Button JSR");
     RCLCPP_INFO(this->get_logger(), "Button JSR");
 
   }
 
   void btn_up_pressed()
   {
-    // ROS_INFO("Button UP");
     RCLCPP_INFO(this->get_logger(), "Button UP");
     if(_mode == DRIVE)
     {
       //toggle reverse
       _reverse_drive = !_reverse_drive;
       //swich sensorhead to default
-      // _pubPosSensorHead.publish(this->getDefaultSensorHead());
       std_msgs::msg::Float64 msg;
       msg.data = 0.0;
       _pubServoPanPos->publish(msg);
@@ -328,84 +338,126 @@ private:    //functions
       if(_reverse_drive)
       {
         //swich driver cam topic
-        // topic_tools_interfaces::srv::MuxSelect srv;
-        // srv.request.topic = _back_cam_topic;
-        if(!this->executeMuxSelectService(_srv_sw_drive_image, _back_cam_topic))//_srv_sw_drive_image.call(srv))
+        if(!this->executeMuxSelectSrv(_srv_sw_drive_image, _back_cam_topic))
         {
-          // ROS_WARN("Unable to call swich topic srv");
           RCLCPP_WARN(this->get_logger(), "Unable to call swich topic srv");
         }
       }
       else
       {
         // swich driver cam topic
-        // topic_tools::MuxSelect srv;
-        // srv.request.topic = _front_cam_topic;
-        if(!this->executeMuxSelectService(_srv_sw_drive_image, _front_cam_topic))//_srv_sw_drive_image.call(srv))
+        if(!this->executeMuxSelectSrv(_srv_sw_drive_image, _front_cam_topic))
         {
-          // ROS_WARN("Unable to call swich topic srv");
           RCLCPP_WARN(this->get_logger(), "Unable to call swich topic srv");
         }
       }
     }
   }
 
+  void btn_right_pressed()
+  {
+    RCLCPP_INFO(this->get_logger(), "Button RIGHT pressed");
+    if(_mode == DRIVE)
+    {
+      //enable drives
+      RCLCPP_INFO(this->get_logger(), "Enable drives");
+      if(!this->executeSetBoolSrv(_srv_enable_drives, true))
+      {
+        RCLCPP_ERROR(this->get_logger(), "Unable to call _srv_enable_drives ...");
+      }
+    }
+    else if(_mode == MANIPULATE_DIRECT || _mode == MANIPULATE_INVERSE)
+    {
+      RCLCPP_INFO(this->get_logger(), "Set arm active");
+      if(!this->executeEmptySrv(_srv_manipulator_set_active))
+      {
+        RCLCPP_ERROR(this->get_logger(), "Unable to call _srv_manipulator_set_active ...");
+      }
+    }
+  }
+
+  void btn_left_pressed()
+  {
+    RCLCPP_INFO(this->get_logger(), "Button LEFT pressed");
+  }
+
+  void btn_down_pressed()
+  {
+    RCLCPP_INFO(this->get_logger(), "Button DOWN pressed");
+    if(_mode == DRIVE)
+    {
+      //disable drives
+      RCLCPP_INFO(this->get_logger(), "Disable drives");
+      if(!this->executeSetBoolSrv(_srv_enable_drives, false))
+      {
+        RCLCPP_ERROR(this->get_logger(), "Unable to call _srv_enable_drives ...");
+      }
+    }
+    else if(_mode == MANIPULATE_DIRECT || _mode == MANIPULATE_INVERSE)
+    {
+      RCLCPP_INFO(this->get_logger(), "Set arm stand by");
+      if(!this->executeEmptySrv(_srv_manipulator_set_stand_by))
+      {
+        RCLCPP_ERROR(this->get_logger(), "Unable to call _srv_manipulator_stand_by ...");
+      }
+    }
+
+  }
+
   void btn_share_pressed()
   {
-    // ROS_INFO("Button share");
-    RCLCPP_INFO(this->get_logger(), "Button share");
+    RCLCPP_INFO(this->get_logger(), "Button share -> Send Victim");
     std_msgs::msg::Bool msg;
     msg.data = true;
     _pubAddVictim->publish(msg);
   }
 
+  void btn_options_pressed()
+  {
+    RCLCPP_INFO(this->get_logger(), "Button options");
+    if(_mode == MANIPULATE_DIRECT || _mode == MANIPULATE_INVERSE)
+    {
+      RCLCPP_INFO(this->get_logger(), "Set arm init_enable");
+      if(!this->executeEmptySrv(_srv_manipulator_init_enable))
+      {
+        RCLCPP_ERROR(this->get_logger(), "Unable to call _srv_manipulator_init_enable ...");
+      }
+    }
+  }
+
 private:    //dataelements
   // ros::NodeHandle _nh;
 
-  // ros::Publisher _pubMode;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr _pubMode;
-  // ros::Publisher _pubTwist;
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr _pubTwist;
-  // ros::Publisher _pubTwistStamped;
   rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr _pubTwistStamped;
-  // ros::Publisher _pubServoPanSpeed;
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr _pubServoPanSpeed;
-  // ros::Publisher _pubServoTiltSpeed;
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr _pubServoTiltSpeed;
-  // ros::Publisher _pubServoPanPos;
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr _pubServoPanPos;
- // ros::Publisher _pubServoTiltPos;
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr _pubServoTiltPos;
-  // ros::Publisher _pubDriveAction;
   // rclcpp::Publisher<std_msgs::msg::String>::SharedPtr _pubDriveAction;
-  // ros::Publisher _pubManipulatorAxisSpeed;
   rclcpp::Publisher<francor_msgs::msg::ManipulatorCmd>::SharedPtr _pubManipulatorAxisSpeed;
-  // ros::Publisher _pubManipulaotrInverseSpeed;
   rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr _pubManipulaotrInverseSpeed;
-  // ros::Publisher _pubAddVictim;
   rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr _pubAddVictim;
 
   
-  // ros::Subscriber _subJoy;
   rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr _subJoy;
-  // ros::Subscriber _subDiagonstics;
   rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr _subDiagnostics;
 
-  //todo
-  // ros::ServiceClient _srv_robotic_arm_stand_by;
-  // ros::ServiceClient _srv_robotic_arm_active;
-  
-  // ros::ServiceClient _srv_sw_drive_image;
-  rclcpp::Client<topic_tools_interfaces::srv::MuxSelect>::SharedPtr _srv_sw_drive_image;
-  // ros::ServiceClient _srv_set_manipulator_axis_mode;
-  rclcpp::Client<std_srvs::srv::Empty>::SharedPtr _srv_set_manipulator_axis_mode;
-  // ros::ServiceClient _srv_set_manipulator_inverse_mode;
-  rclcpp::Client<std_srvs::srv::Empty>::SharedPtr _srv_set_manipulator_inverse_mode;
 
-  // ros::Timer _loopTimer;
+  rclcpp::Client<std_srvs::srv::Empty>::SharedPtr _srv_manipulator_axis_mode;
+  rclcpp::Client<std_srvs::srv::Empty>::SharedPtr _srv_manipulator_inverse_mode;
+  rclcpp::Client<std_srvs::srv::Empty>::SharedPtr _srv_manipulator_set_active;
+  rclcpp::Client<std_srvs::srv::Empty>::SharedPtr _srv_manipulator_set_stand_by;
+  rclcpp::Client<std_srvs::srv::Empty>::SharedPtr _srv_manipulator_init_enable;
+  rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr _srv_enable_drives;
+  rclcpp::Client<topic_tools_interfaces::srv::MuxSelect>::SharedPtr _srv_sw_drive_image;
+
+
   rclcpp::TimerBase::SharedPtr _loopTimer;
-  // ros::Timer _loopModeTimer;
   rclcpp::TimerBase::SharedPtr _loopModeTimer;
+  //timer clear servcalls
+  // rclcpp::TimerBase::SharedPtr _timerCleanSrvs;
 
   sensor_msgs::msg::Joy::SharedPtr _joy;
 
@@ -418,12 +470,9 @@ private:    //dataelements
   double _max_lin_vel;
   double _max_ang_vel;
 
-  // double _max_sh_vel;
-
   double _axis_factor;
   double _axis_offset;
 
-  // francor_msgs::SensorHeadCmd _sh_default;
   double _sh_tilt_default;
 
   std::unique_ptr<francor::JoyMap> _joy_mapper;

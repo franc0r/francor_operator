@@ -21,6 +21,7 @@
       "description": "pkgs from this meta pkg",
       "options": [
         "francor_joy2vel",
+        "francor_gui",
         "francor_operator",
       ]
     }

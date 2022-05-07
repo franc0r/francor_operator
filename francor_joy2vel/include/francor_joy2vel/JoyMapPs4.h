@@ -138,22 +138,21 @@ protected:
       input.init_ok = true;
     }
 
-    //todo buttons...
-
-    
     input.btns[btn::X] = joy_msg.buttons[2];
     input.btns[btn::Y] = joy_msg.buttons[3];
     input.btns[btn::A] = joy_msg.buttons[0];
     input.btns[btn::B] = joy_msg.buttons[1];
     input.btns[btn::JS_L] = joy_msg.buttons[11];
     input.btns[btn::JS_R] = joy_msg.buttons[12];
-    input.btns[btn::UP] = joy_msg.axes[7] == 1.0;           //todo
-    input.btns[btn::DOWN] = joy_msg.buttons[0];           //todo
-    input.btns[btn::LEFT] = joy_msg.buttons[0];           //todo
-    input.btns[btn::RIGHT] = joy_msg.buttons[0];            //todo
+    input.btns[btn::UP]    = joy_msg.axes[7] == 1.0;
+    input.btns[btn::DOWN]  = joy_msg.axes[7] == -1.0;
+    input.btns[btn::LEFT]  = joy_msg.axes[6] == 1.0;
+    input.btns[btn::RIGHT] = joy_msg.axes[6] == -1.0;
+
     input.btns[btn::TR_L] = joy_msg.buttons[4];
     input.btns[btn::TR_R] = joy_msg.buttons[5];
     input.btns[btn::SHARE] = joy_msg.buttons[8];
+    input.btns[btn::OPTIONS] = joy_msg.buttons[9];
 
     return input;
   }

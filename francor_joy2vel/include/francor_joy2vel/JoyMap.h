@@ -41,6 +41,7 @@ enum enum_JoyMapBtn{
   TR_L,
   TR_R,
   SHARE,
+  OPTIONS,
   NUM_BTN
 };
 } //namespace btn
@@ -182,7 +183,7 @@ public:
     geometry_msgs::msg::Vector3 cmd;
 
     cmd.x = _input.vel_lin_x;  
-    cmd.y = 0.0;  //currently not used
+    cmd.y = _input.vel_ang;  //currently not used
     cmd.z = _input.vel_ang_up;
 
     return cmd;
