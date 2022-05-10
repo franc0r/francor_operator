@@ -8,7 +8,7 @@
 #include "FrancorWidget.hpp"
 
 #include <std_msgs/msg/string.hpp>
-
+#include <std_msgs/msg/float32.hpp>
 
 
 namespace Ui {
@@ -31,6 +31,11 @@ private:
     std::cout << "sub_str_callback: " << msg->data << std::endl;
   }
 
+  void sub_co2_callback(const std_msgs::msg::Float32::SharedPtr msg)
+  {
+    _francor_widget->setCo2Value((int)msg->data);
+  }
+
 private: 
 
   Ui::MainWindow *ui;
@@ -39,6 +44,8 @@ private:
   QTimer* _timer_spin;  
 
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr _sub_string;
+  rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr _sub_co2;
+
 };
 
 

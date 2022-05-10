@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(_timer_spin, SIGNAL(timeout()), this, SLOT(timer_spin_callback()));
 
   _sub_string = this->create_subscription<std_msgs::msg::String>("/joy2vel/mode", 10, std::bind(&MainWindow::sub_str_callback, this, std::placeholders::_1));
+  _sub_co2 = this->create_subscription<std_msgs::msg::Float32>("/co2_level", 10, std::bind(&MainWindow::sub_co2_callback, this, std::placeholders::_1));
 
   _timer_spin->start(100);
 }

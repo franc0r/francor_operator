@@ -32,11 +32,10 @@ FrancorWidget::FrancorWidget()
   auto textBarSlow = new QLabel("CO2 Sensor (slow)");
   _grid_layout->addWidget(textBarSlow);
   _co2bar_slow = new QProgressBar;
-  _co2bar_slow->setMaximum(2048);
+  _co2bar_slow->setMaximum(100);
   _co2bar_slow->setMinimum(0);
-  _co2bar_slow->setFormat("%v ppm");
+  _co2bar_slow->setFormat("%");
   _grid_layout->addWidget(_co2bar_slow);
-
 
     // info texts
   auto textInfoTextA = new QLabel("Info Text A");
@@ -60,10 +59,9 @@ FrancorWidget::FrancorWidget()
   // set layout and show final configured widget
 }
 
-
-
-
-
-
+void FrancorWidget::setCo2Value(int value)
+{
+  _co2bar_slow->setValue(value);
+} 
 
 } //namespace francor

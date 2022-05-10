@@ -27,6 +27,8 @@ public:
   {
     return _grid_layout;
   }
+  
+  void setCo2Value(int value);
 
 private:
   // QWidget*      _widget;
