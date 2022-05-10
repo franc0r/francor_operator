@@ -156,7 +156,7 @@ FrancorJoy2Vel::FrancorJoy2Vel() : rclcpp::Node("francor_joy2vel_node")
   _srv_manipulator_set_stand_by = this->create_client<std_srvs::srv::Empty>("manipulator/set/mode/standby");
   _srv_manipulator_init_enable = this->create_client<std_srvs::srv::Empty>("manipulator/set/init_enable");
   _srv_enable_drives = this->create_client<std_srvs::srv::SetBool>("francor/enable_drives/todo");
-  _srv_sw_drive_image = this->create_client<topic_tools_interfaces::srv::MuxSelect>("/mux/select");
+  _srv_sw_drive_image = this->create_client<topic_tools_interfaces::srv::MuxSelect>("/mux_drive_img/select");
 
   _reverse_drive = false;
 

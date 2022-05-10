@@ -12,15 +12,17 @@
 #include <QLabel>
 #include <QLineEdit>
 
+class MainWindow;
 
 namespace francor{
+
 
 class FrancorWidget : public QObject
 {
   Q_OBJECT
 
 public:
-  FrancorWidget();
+  FrancorWidget(MainWindow* parent);
   virtual ~FrancorWidget() = default;
 
   QGridLayout* getLayout()
@@ -29,6 +31,19 @@ public:
   }
   
   void setCo2Value(int value);
+
+  void setInfoA(const std::string& info)
+  {
+    _info_text_a->setText(info.c_str());
+  }
+  void setInfoB(const std::string& info)
+  {
+    _info_text_b->setText(info.c_str());
+  }
+  void setInfoC(const std::string& info)
+  {
+    _info_text_c->setText(info.c_str());
+  }
 
 private:
   // QWidget*      _widget;
@@ -39,7 +54,12 @@ private:
   QLineEdit*    _info_text_b;
   QLineEdit*    _info_text_c;
 
+  //btn
+  QPushButton* _btn_vid_disable;
+  QPushButton* _btn_vid_manip;
+  QPushButton* _btn_vid_haz;
 
+  MainWindow* _parent;
 };
 
 } //namespace francor

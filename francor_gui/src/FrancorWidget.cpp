@@ -1,18 +1,36 @@
 #include "FrancorWidget.hpp"
 
+#include "FrancorGuiNode.hpp"
 
 namespace francor{
 
 
 
-FrancorWidget::FrancorWidget()
+FrancorWidget::FrancorWidget(MainWindow* parent)
 {
-
+  _parent = parent;
   _grid_layout = new QGridLayout;
+
+  //btns for vid
+  _btn_vid_disable = new QPushButton("vid_disable");
+  _btn_vid_manip = new QPushButton("vid_manip");
+  _btn_vid_haz = new QPushButton("vid_haz");
+  _grid_layout->addWidget(_btn_vid_disable);
+  _grid_layout->addWidget(_btn_vid_manip);
+  _grid_layout->addWidget(_btn_vid_haz);
+
+  this->connect(_btn_vid_disable, SIGNAL(clicked()), _parent, SLOT(btn_vid_disable_clicked()));
+  this->connect(_btn_vid_manip, SIGNAL(clicked()), _parent, SLOT(btn_vid_manip_clicked()));
+  this->connect(_btn_vid_haz, SIGNAL(clicked()), _parent, SLOT(btn_vid_haz_clicked()));
+  
+
   auto stopButton = new QPushButton(QIcon("/home/m1ch1/workspace/ros2/dev_ws/src/francor_operator/francor_gui/icon/icon-stop.png"), "");
   stopButton->setMinimumSize(256, 256);
   _grid_layout->addWidget(stopButton);
   // this->connect(stopButton, SIGNAL(pressed()), this, SLOT(stop()));
+  
+
+
 
   // stop slam service
   auto stopSlamButton = new QPushButton("STOP SLAM");

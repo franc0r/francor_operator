@@ -178,7 +178,7 @@ private:    //functions
     // francor_msgs::SensorHeadCmd cmd = _sh_default;
     std_msgs::msg::Float64 cmd;
     cmd.data = _sh_tilt_default;
-    if(_reverse_drive)
+    if(!_reverse_drive)
     {
       cmd.data *= -1;
     }

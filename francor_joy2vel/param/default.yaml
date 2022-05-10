@@ -2,19 +2,12 @@
   ros__parameters:
     axis_factor: 1600.0
     axis_offset: 700.0
-    back_cam_topic: /back_cam/image_raw/compressed
+    back_cam_topic: /camera/back/image_raw/compressed
     dead_zone_sh: 0.3
-    front_cam_topic: /front_cam/image_raw/compressed
+    front_cam_topic: /camera/front/image_raw/compressed
     joy_map: default
-    max_ang_vel: 1.0
-    max_lin_vel: 1.0
-    qos_overrides:
-      /parameter_events:
-        publisher:
-          depth: 1000
-          durability: volatile
-          history: keep_last
-          reliability: reliable
+    max_ang_vel: 0.6
+    max_lin_vel: 0.5
     rate: 50.0
     tilt_default: 0.5
     use_sim_time: false
