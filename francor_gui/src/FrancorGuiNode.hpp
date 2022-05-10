@@ -7,8 +7,11 @@
 #include <QTimer>
 #include "FrancorWidget.hpp"
 
+#include <std_msgs/msg/detail/float32__struct.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <std_msgs/msg/float32.hpp>
+#include <image_transport/image_transport.hpp>
+#include <image_transport/subscriber.hpp>
 
 
 namespace Ui {
@@ -36,6 +39,8 @@ private:
     _francor_widget->setCo2Value((int)msg->data);
   }
 
+  void callbackCameraDrive(const sensor_msgs::msg::Image::ConstSharedPtr& msg);
+
 private: 
 
   Ui::MainWindow *ui;
@@ -44,8 +49,8 @@ private:
   QTimer* _timer_spin;  
 
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr _sub_string;
-  rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr _sub_co2;
-
+  image_transport::Subscriber _sub_cam_drive;
+  image_transport::Subscriber _sub_cam_thermo;
 };
 
 
