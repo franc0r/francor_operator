@@ -134,8 +134,8 @@ FrancorJoy2Vel::FrancorJoy2Vel() : rclcpp::Node("francor_joy2vel_node")
 
   //init publisher
   _pubMode = this->create_publisher<std_msgs::msg::String>("joy2vel/mode", 1);
-  _pubTwistStamped = this->create_publisher<geometry_msgs::msg::TwistStamped>("cmd_vel/stamped", 1);
-  _pubTwist = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 1);
+  _pubTwistStamped = this->create_publisher<geometry_msgs::msg::TwistStamped>("cmd_vel/stamped", rclcpp::QoS(1).best_effort());
+  _pubTwist = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::QoS(1).best_effort());
   _pubServoPanSpeed = this->create_publisher<std_msgs::msg::Float64>("/servo_lx16a/sensor_head_yaw/speed", 1);
   _pubServoTiltSpeed = this->create_publisher<std_msgs::msg::Float64>("/servo_lx16a/sensor_head_pitch/speed", 1);
   _pubServoPanPos = this->create_publisher<std_msgs::msg::Float64>("/servo_lx16a/sensor_head_yaw/pos", 1);

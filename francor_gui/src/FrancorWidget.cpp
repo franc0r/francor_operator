@@ -74,7 +74,21 @@ FrancorWidget::FrancorWidget(MainWindow* parent)
   _info_text_c->setReadOnly(true);
   _grid_layout->addWidget(_info_text_c);
   
-  // set layout and show final configured widget
+
+  // auto temp_grid_layout = new QGridLayout;
+  
+
+  _lbl_temp_front_right = new QLabel("temp_front_right");
+  _lbl_temp_front_left  = new QLabel("temp_front_left");  
+  _lbl_temp_back_left   = new QLabel("temp_back_left");
+  _lbl_temp_back_right  = new QLabel("temp_back_right");
+
+  _grid_layout->addWidget(_lbl_temp_front_right);
+  _grid_layout->addWidget(_lbl_temp_front_left);
+  _grid_layout->addWidget(_lbl_temp_back_left);
+  _grid_layout->addWidget(_lbl_temp_back_right);
+
+  // _grid_layout->addItem(temp_grid_layout,0,0);
 }
 
 void FrancorWidget::setCo2Value(int value)

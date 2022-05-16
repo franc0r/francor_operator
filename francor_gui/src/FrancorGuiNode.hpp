@@ -42,6 +42,8 @@ private slots:
       this, "/camera/drive/image_raw",
       std::bind(&MainWindow::callbackCameraDrive, this, std::placeholders::_1),
       "compressed", rmw_qos_profile_sensor_data);
+
+    this->show_black();
   }
   void btn_vid_manip_clicked()
   {
@@ -99,6 +101,8 @@ private slots:
       "compressed", rmw_qos_profile_sensor_data);
   }
 
+  void show_black();
+
 private: 
   void sub_str_a_callback(const std_msgs::msg::String::SharedPtr msg)
   {
@@ -120,8 +124,8 @@ private:
 
   void sub_co2_callback(const std_msgs::msg::Float32::SharedPtr msg)
   {
-    // std::cout << "sub_co2_callback: " << msg->data << std::endl;
-    _francor_widget->setCo2Value((int)msg->data * 3);
+    std::cout << "sub_co2_callback: " << msg->data << std::endl;
+    _francor_widget->setCo2Value((int)(msg->data));
     // _francor_widget->seti
   }
 
@@ -134,6 +138,11 @@ private:
   void callbackCameraTele_main(const sensor_msgs::msg::Image::ConstSharedPtr& msg);
 
   void callbackCameraTele_backup(const sensor_msgs::msg::Image::ConstSharedPtr& msg);
+
+  void callbackTempFrontRight(const std_msgs::msg::Float32::SharedPtr msg);
+  void callbackTempFrontLeft(const std_msgs::msg::Float32::SharedPtr msg);
+  void callbackTempRearRight(const std_msgs::msg::Float32::SharedPtr msg);
+  void callbackTempRearLeft(const std_msgs::msg::Float32::SharedPtr msg);
 
 
   void callbackCameraThermo(const sensor_msgs::msg::Image::ConstSharedPtr& msg);
@@ -168,6 +177,10 @@ private:
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr _sub_string_a;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr _sub_string_b;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr _sub_string_c;
+  rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr _sub_temp_wheel_front_right;
+  rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr _sub_temp_wheel_front_left;
+  rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr _sub_temp_wheel_back_right;
+  rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr _sub_temp_wheel_back_left;
   image_transport::Subscriber _sub_cam_drive;
   image_transport::Subscriber _sub_cam_thermo;
   image_transport::Subscriber _sub_cam_manip;

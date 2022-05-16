@@ -45,6 +45,26 @@ public:
     _info_text_c->setText(info.c_str());
   }
 
+  void setTempFR(const float temp)
+  {
+    _lbl_temp_front_right->setText(QString::number(temp));
+  }
+
+  void setTempFL(const float temp)
+  {
+    _lbl_temp_front_left->setText(QString::number(temp));
+  }
+
+  void setTempBL(const float temp)
+  {
+    _lbl_temp_back_left->setText(QString::number(temp));
+  }
+
+  void setTempBR(const float temp)
+  {
+    _lbl_temp_back_right->setText(QString::number(temp));
+  }
+
 private:
   // QWidget*      _widget;
   QGridLayout*  _grid_layout;
@@ -58,6 +78,13 @@ private:
   QPushButton* _btn_vid_disable;
   QPushButton* _btn_vid_manip;
   QPushButton* _btn_vid_haz;
+
+  //label
+  QLabel* _lbl_temp_front_right;
+  QLabel* _lbl_temp_front_left;
+  QLabel* _lbl_temp_back_right;
+  QLabel* _lbl_temp_back_left;
+
 
   MainWindow* _parent;
 };
