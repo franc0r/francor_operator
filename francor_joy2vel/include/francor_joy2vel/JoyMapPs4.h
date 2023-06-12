@@ -42,14 +42,14 @@ protected:
     JoyInput input;
     // -- velocity ------
     //5 forward    neutral:+1 max:-0.5
-    //3 backward   neutral:+1 max:-0.5
-    //2 angular    leftmax:1 , neutral:0, rightmax:-1
+    //2 backward   neutral:+1 max:-0.5
+    //0 angular    leftmax:1 , neutral:0, rightmax:-1
     
     // origin value is min->max 1 -> -0.5
     double forward = joy_msg.axes[5];
     forward -= 1; //set to 0
     forward *= -1; //ivert to 0..1.5
-    forward /= 1.5;
+    forward /= 2;
 
     forward = (forward > 1 ? 1 : forward);
 
@@ -60,7 +60,7 @@ protected:
     double back    = joy_msg.axes[2];
     back -= 1; //set to 0
     back *= -1; //ivert to 0..1.5
-    back /= 1.5;
+    back /= 2;
 
     back = (back > 1 ? 1 : back);
 
@@ -76,7 +76,7 @@ protected:
     rot = std::abs(rot);
     rot *= rot_fac_1 * rot + rot_fac_2 * rot * rot;
 
-    rot *= sign;
+    rot *= sign * -1;
 
     double rot_up     = joy_msg.axes[1];
     sign = rot_up < 0 ? -1 : 1;
@@ -135,7 +135,13 @@ protected:
     // input.init_val = -0.9;
     if(joy_msg.axes[5] < -0.99 && joy_msg.axes[2] < -0.99)
     {
+      // std::cout << "INIT OK" << std::endl;
       input.init_ok = true;
+    }
+
+    if(joy_msg.axes[5] != 1.0 || joy_msg.axes[2] != 1.0)
+    {
+      input.vel_pressed = true;
     }
 
     input.btns[btn::X] = joy_msg.buttons[2];

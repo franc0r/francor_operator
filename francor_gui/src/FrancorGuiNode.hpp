@@ -43,6 +43,17 @@ private slots:
       std::bind(&MainWindow::callbackCameraDrive, this, std::placeholders::_1),
       "compressed", rmw_qos_profile_sensor_data);
 
+    // /camera/fish/ir/image_raw
+    // _sub_cam_manip = image_transport::create_subscription(
+    //   this, "/camera/fish/ir/image_raw",
+    //   std::bind(&MainWindow::callbackCameraManip, this, std::placeholders::_1),
+    //   "compressed", rmw_qos_profile_sensor_data);
+
+    _sub_cam_tele_backup = image_transport::create_subscription(
+      this, "/camera/fish/ir/image_raw",
+      std::bind(&MainWindow::callbackCameraTele_backup, this, std::placeholders::_1),
+      "compressed", rmw_qos_profile_sensor_data);
+
     this->show_black();
   }
   void btn_vid_manip_clicked()
@@ -80,13 +91,15 @@ private slots:
   {
     //sub tele to main, haz to manip and thermo to backup
     _sub_cam_tele_backup.shutdown();
+    _sub_cam_tele_main.shutdown();
     _sub_cam_manip.shutdown();
     _sub_cam_drive.shutdown();
+    _sub_hazmat.shutdown();
 
-    // _sub_hazmat = image_transport::create_subscription(
-    //   this, "/hazmat/todo",
-    //   std::bind(&MainWindow::callbackCameraTele_main, this, std::placeholders::_1),
-    //   "compressed", rmw_qos_profile_sensor_data);
+    _sub_hazmat = image_transport::create_subscription(
+      this, "/find_object_2d/img_hazmats",
+      std::bind(&MainWindow::callbackCameraHaz, this, std::placeholders::_1),
+      "compressed", rmw_qos_profile_sensor_data);
 
     _sub_cam_thermo = image_transport::create_subscription(
       this, "/image_raw",
@@ -97,7 +110,7 @@ private slots:
 
     _sub_cam_tele_backup = image_transport::create_subscription(
       this, "/camera/tele/image_raw",
-      std::bind(&MainWindow::callbackCameraTele_main, this, std::placeholders::_1),
+      std::bind(&MainWindow::callbackCameraTele_backup, this, std::placeholders::_1),
       "compressed", rmw_qos_profile_sensor_data);
   }
 

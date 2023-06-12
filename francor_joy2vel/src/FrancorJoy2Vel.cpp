@@ -133,9 +133,10 @@ FrancorJoy2Vel::FrancorJoy2Vel() : rclcpp::Node("francor_joy2vel_node")
   _joy_mapper->attach_callback(francor::btn::OPTIONS,   std::bind(&FrancorJoy2Vel::btn_options_pressed, this));
 
   //init publisher
+  _pubTwistInfo = this->create_publisher<std_msgs::msg::String>("joy2vel/twist_info", 1);
   _pubMode = this->create_publisher<std_msgs::msg::String>("joy2vel/mode", 1);
-  _pubTwistStamped = this->create_publisher<geometry_msgs::msg::TwistStamped>("cmd_vel/stamped", rclcpp::QoS(1).best_effort());
-  _pubTwist = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::QoS(1).best_effort());
+  _pubTwistStamped = this->create_publisher<geometry_msgs::msg::TwistStamped>("cmd_vel/stamped", rclcpp::QoS(1));
+  _pubTwist = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", rclcpp::QoS(1));
   _pubServoPanSpeed = this->create_publisher<std_msgs::msg::Float64>("/servo_lx16a/sensor_head_yaw/speed", 1);
   _pubServoTiltSpeed = this->create_publisher<std_msgs::msg::Float64>("/servo_lx16a/sensor_head_pitch/speed", 1);
   _pubServoPanPos = this->create_publisher<std_msgs::msg::Float64>("/servo_lx16a/sensor_head_yaw/pos", 1);
@@ -199,6 +200,7 @@ void FrancorJoy2Vel::init()
 
 void FrancorJoy2Vel::subJoy_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
 {
+  _last_joy = this->get_clock()->now();
   _first_msg_rdy = true;
   _joy = msg;
 }
@@ -222,6 +224,7 @@ void FrancorJoy2Vel::subDiagnostic_callback(const diagnostic_msgs::msg::Diagnost
           _joy_mapper->showInitMsg();
         }
         _joystick_rdy = false;
+        _init_done = false;
       }
       break;
     }
@@ -239,7 +242,13 @@ void FrancorJoy2Vel::loop_callback()
   if(!_joystick_rdy)
   {
     auto joy_input = _joy_mapper->getJoyInput();
+    
     if(joy_input.init_ok)
+    {
+      _init_done = true;
+    }
+
+    if(_init_done && !joy_input.vel_pressed)
     {
       _joystick_rdy = true;
       RCLCPP_INFO(this->get_logger(), "Joystick initialized...");
@@ -251,6 +260,15 @@ void FrancorJoy2Vel::loop_callback()
       _pubTwist->publish(this->getEmptyTwist().twist);
     }
     // _pubDriveAction.publish(this->toDriveAction(DRIVE_ACTION_NONE));
+    return;
+  }
+
+  //check time to last joy msg
+  if((this->get_clock()->now() - _last_joy).seconds() > 0.6)
+  {
+    RCLCPP_INFO(this->get_logger(), "Timeout Joy -> send empty twist");
+    _pubTwistStamped->publish(this->getEmptyTwist());
+    _pubTwist->publish(this->getEmptyTwist().twist);
     return;
   }
 

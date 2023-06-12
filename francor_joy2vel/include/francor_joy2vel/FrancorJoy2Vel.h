@@ -255,11 +255,17 @@ private:    //functions
       if(_twist_enabled)
       {
         RCLCPP_INFO(this->get_logger(), "Disable Twist");
+        std_msgs::msg::String msg;
+        msg.data = "Twist: Disabled";
+        _pubTwistInfo->publish(msg);
         _twist_enabled = false;
       }
       else
       {
         RCLCPP_INFO(this->get_logger(), "Enable Twist");
+        std_msgs::msg::String msg;
+        msg.data = "Twist: Enabled";
+        _pubTwistInfo->publish(msg);
         _twist_enabled = true;
       }
     }
@@ -428,6 +434,7 @@ private:    //functions
 private:    //dataelements
   // ros::NodeHandle _nh;
 
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr _pubTwistInfo;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr _pubMode;
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr _pubTwist;
   rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr _pubTwistStamped;
@@ -459,11 +466,14 @@ private:    //dataelements
   //timer clear servcalls
   // rclcpp::TimerBase::SharedPtr _timerCleanSrvs;
 
+  rclcpp::Time _last_joy = {0,0};
+
   sensor_msgs::msg::Joy::SharedPtr _joy;
 
   std_msgs::msg::String::SharedPtr _drive_action;
 
   bool _joystick_rdy = false;
+  bool _init_done = false;
   bool _first_msg_rdy = false;
   double _rate;
 

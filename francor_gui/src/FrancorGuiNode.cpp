@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
   _sub_string_a = this->create_subscription<std_msgs::msg::String>("/joy2vel/mode", 10, std::bind(&MainWindow::sub_str_a_callback, this, std::placeholders::_1));
   _sub_string_b = this->create_subscription<std_msgs::msg::String>("/manipulator/status", 10, std::bind(&MainWindow::sub_str_b_callback, this, std::placeholders::_1));
-  // _sub_string_c = this->create_subscription<std_msgs::msg::String>("/joy2vel/mode", 10, std::bind(&MainWindow::sub_str_callback, this, std::placeholders::_1));
+  _sub_string_c = this->create_subscription<std_msgs::msg::String>("/joy2vel/twist_info", 10, std::bind(&MainWindow::sub_str_c_callback, this, std::placeholders::_1));
 
   _sub_co2 = this->create_subscription<std_msgs::msg::Float32>("/co2_level", rclcpp::QoS(1).best_effort(), std::bind(&MainWindow::sub_co2_callback, this, std::placeholders::_1));
 
@@ -113,10 +113,11 @@ void MainWindow::callbackCameraHaz(const sensor_msgs::msg::Image::ConstSharedPtr
     cv_bridge::CvImageConstPtr cv_ptr = cv_bridge::toCvShare(msg, sensor_msgs::image_encodings::RGB8);
     cv::Mat img = cv_ptr->image;
 
-    cv::Mat scaled = this->resize_to400(img);
+    cv::Mat scaled = this->resize_to800(img);
 
      QImage imgIn= QImage((uchar*) scaled.data, scaled.cols, scaled.rows, scaled.step, QImage::Format_RGB888);
-     ui->label_video_backup->setPixmap(QPixmap::fromImage(imgIn));
+    //  ui->label_video_backup->setPixmap(QPixmap::fromImage(imgIn));
+     ui->label_video_drive->setPixmap(QPixmap::fromImage(imgIn));
     // cv::imshow("haz", img);
     // cv::waitKey(5);
     }
@@ -140,7 +141,7 @@ void MainWindow::callbackCameraHaz(const sensor_msgs::msg::Image::ConstSharedPtr
     cv::Mat scaled = this->resize_to(img, 220, 400);
 
      QImage imgIn= QImage((uchar*) scaled.data, scaled.cols, scaled.rows, scaled.step, QImage::Format_RGB888);
-     ui->label_video_backup->setPixmap(QPixmap::fromImage(imgIn));
+     ui->label_video_manip->setPixmap(QPixmap::fromImage(imgIn));
     // cv::imshow("haz", img);
     // cv::imshow("thermo", img);
     // cv::waitKey(5);

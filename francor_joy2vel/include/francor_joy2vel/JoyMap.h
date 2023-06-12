@@ -62,6 +62,8 @@ struct JoyInput{
 
   double vel_res = 0.0;
 
+  bool vel_pressed = false;
+
   std::vector<bool> btns = std::vector<bool>(btn::NUM_BTN, false);
 };
 
