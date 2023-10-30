@@ -109,11 +109,22 @@ FrancorJoy2Vel::FrancorJoy2Vel() : rclcpp::Node("francor_joy2vel_node")
     RCLCPP_INFO(this->get_logger(), "Create TODO mapper");
     _joy_mapper = std::make_unique<francor::JoyMapSc>(dead_zone_sh);
   }
+  else if(joy_map == "ps5")
+  {
+    RCLCPP_INFO(this->get_logger(), "Create PS5 mapper");
+    _joy_mapper = std::make_unique<francor::JoyMapPs5>(dead_zone_sh);
+  }
+  else if(joy_map == "ps4")
+  {
+    RCLCPP_INFO(this->get_logger(), "Create PS4 mapper");
+    _joy_mapper = std::make_unique<francor::JoyMapPs4>(dead_zone_sh);
+  }
   else
   {
     RCLCPP_INFO(this->get_logger(), "Create Default mapper (Ps4)");
     _joy_mapper = std::make_unique<francor::JoyMapPs4>(dead_zone_sh);
   }
+
 
   _joy_mapper->showInitMsg();
 

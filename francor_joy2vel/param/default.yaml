@@ -5,9 +5,9 @@
     back_cam_topic: /camera/back/image_raw/compressed
     dead_zone_sh: 0.3
     front_cam_topic: /camera/front/image_raw/compressed
-    joy_map: default
-    max_ang_vel: 1.8
-    max_lin_vel: 0.9
+    joy_map: ps5
+    max_ang_vel: 2.0
+    max_lin_vel: 1.2
     rate: 50.0
     tilt_default: 0.5
     use_sim_time: false

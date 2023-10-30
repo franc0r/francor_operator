@@ -37,7 +37,7 @@
 #include "francor_joy2vel/JoyMap.h"
 #include "francor_joy2vel/JoyMapSc.h" //steam controller differential
 #include "francor_joy2vel/JoyMapPs4.h"
-
+#include "francor_joy2vel/JoyMapPs5.h"
 
 
 #include "francor_msgs/msg/manipulator_cmd.hpp"

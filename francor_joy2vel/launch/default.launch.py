@@ -22,7 +22,7 @@ def generate_launch_description():
                           parameters=[config],
                           remappings=[
                             #pub
-                            ('/cmd_vel', '/francor_frank_base/cmd_vel'),
+                            ('/cmd_vel', '/joy_vel/cmd_vel'),
                             ('/cmd_vel/stamped', '/cmd_vel/stamped'),
                             ('/servo_lx16a/sensor_head_yaw/speed', '/servo_lx16a/sensor_head_yaw/speed'),
                             ('/servo_lx16a/sensor_head_pitch/speed', '/servo_lx16a/sensor_head_pitch/speed'),
